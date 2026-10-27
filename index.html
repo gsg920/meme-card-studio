@@ -35,7 +35,6 @@
         }
     </script>
     <style>
-        /* Custom scrollbar */
         ::-webkit-scrollbar {
             width: 6px;
             height: 6px;
@@ -50,7 +49,6 @@
         ::-webkit-scrollbar-thumb:hover {
             background: #94a3b8;
         }
-        /* Canvas container aspect ratio preservation styling */
         .canvas-wrapper {
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
@@ -58,7 +56,6 @@
 </head>
 <body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
 
-    <!-- Top Navigation Bar (T03-C01: Public Access, No auth needed) -->
     <header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
             <div class="flex items-center space-x-3">
@@ -74,7 +71,6 @@
                 </div>
             </div>
 
-            <!-- Header Quick Badges (T03-C28, C29, C30) -->
             <div class="hidden md:flex items-center space-x-3 text-xs">
                 <span class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 border border-slate-700 text-slate-300">
                     <i class="fa-solid fa-shield-halved text-emerald-400"></i> EXIF 메타데이터 0건
@@ -86,13 +82,12 @@
         </div>
     </header>
 
-    <!-- Main Editor Content Grid -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
 
-        <!-- LEFT PANEL: Controls & Settings (5 Cols) -->
+        <!-- LEFT PANEL: Controls & Settings -->
         <section class="lg:col-span-5 flex flex-col gap-5">
 
-            <!-- Tab Buttons -->
+            <!-- Tab Buttons (극단검사 버튼 삭제됨) -->
             <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-medium">
                 <button id="tab-editor-btn" onclick="switchLeftTab('editor')" class="flex-1 py-2 rounded-lg bg-blue-600 text-white transition-all">
                     <i class="fa-solid fa-pen-to-square mr-1.5"></i>편집기 (T03-C03)
@@ -100,15 +95,11 @@
                 <button id="tab-template-btn" onclick="switchLeftTab('templates')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all">
                     <i class="fa-solid fa-folder-open mr-1.5"></i>템플릿 CRUD (C17-21)
                 </button>
-                <button id="tab-qa-btn" onclick="switchLeftTab('qa')" class="flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all">
-                    <i class="fa-solid fa-vial mr-1.5"></i>극단검사 12건 (C14-16)
-                </button>
             </div>
 
             <!-- PANEL 1: EDITOR CONTROLS -->
             <div id="panel-editor" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-5">
                 
-                <!-- 1. Aspect Ratio Selector (Card 2) -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                         1. 화면비 선택 (T03-C11 ~ C13)
@@ -129,7 +120,6 @@
                     </div>
                 </div>
 
-                <!-- 2. Image Source Controls (Card 1: C04, C05, C09, C10, C28) -->
                 <div>
                     <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
                         2. 배경 이미지 (PNG·JPEG 지원)
@@ -149,7 +139,6 @@
                     </div>
                 </div>
 
-                <!-- 3. Text Overlay Editor (Card 1: C06, C07, C08) -->
                 <div class="space-y-3 pt-2 border-t border-slate-800">
                     <div class="flex items-center justify-between">
                         <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">
@@ -158,12 +147,10 @@
                         <span class="text-[10px] bg-slate-800 px-2 py-0.5 rounded text-slate-400">실시간 반영됨</span>
                     </div>
 
-                    <!-- Text Input area -->
                     <div>
                         <textarea id="text-input" rows="3" oninput="updateTextFromInput()" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-sans" placeholder="짤에 들어갈 문구를 입력하세요 (줄바꿈 가능)"></textarea>
                     </div>
 
-                    <!-- Font Preset & Style Options -->
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="text-[11px] text-slate-400 block mb-1">글꼴 (Font)</label>
@@ -184,7 +171,6 @@
                         </div>
                     </div>
 
-                    <!-- Font Size & Colors Slider -->
                     <div class="space-y-2">
                         <div>
                             <div class="flex justify-between text-[11px] text-slate-400 mb-1">
@@ -211,18 +197,26 @@
                             </div>
                         </div>
 
-                        <!-- Position Sliders (T03-C06) -->
-                        <div class="pt-2">
-                            <div class="flex justify-between text-[11px] text-slate-400 mb-1">
-                                <span>수직 위치 (Y Position - T03-C06)</span>
-                                <span id="pos-y-val" class="text-blue-400 font-mono">80%</span>
+                        <!-- 위치 조절 슬라이더 (수직 & 수평) -->
+                        <div class="pt-2 space-y-2">
+                            <div>
+                                <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                    <span>수직 위치 (Y Position - T03-C06)</span>
+                                    <span id="pos-y-val" class="text-blue-400 font-mono">80%</span>
+                                </div>
+                                <input type="range" id="pos-y-slider" min="5" max="95" value="80" oninput="updateCanvas()" class="w-full accent-blue-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
                             </div>
-                            <input type="range" id="pos-y-slider" min="5" max="95" value="80" oninput="updateCanvas()" class="w-full accent-blue-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                            <div>
+                                <div class="flex justify-between text-[11px] text-slate-400 mb-1">
+                                    <span>수평 위치 (X Position)</span>
+                                    <span id="pos-x-val" class="text-blue-400 font-mono">50%</span>
+                                </div>
+                                <input type="range" id="pos-x-slider" min="5" max="95" value="50" oninput="updateCanvas()" class="w-full accent-blue-500 bg-slate-800 h-1.5 rounded-lg appearance-none cursor-pointer">
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Export / Download Action Buttons -->
                 <div class="pt-3 border-t border-slate-800 flex flex-col gap-2">
                     <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                         4. 결과물 내려받기 (Card 2)
@@ -239,7 +233,7 @@
 
             </div>
 
-            <!-- PANEL 2: TEMPLATE CRUD (Card 4 & Card 5) -->
+            <!-- PANEL 2: TEMPLATE CRUD -->
             <div id="panel-templates" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 hidden">
                 <div class="flex items-center justify-between">
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
@@ -252,7 +246,6 @@
                     현재 편집 중인 디자인을 저장하고 불러오거나 수정/삭제할 수 있습니다. (새로고침 시 유지)
                 </p>
 
-                <!-- Create New Template Input -->
                 <div class="flex gap-2">
                     <input type="text" id="new-template-name" placeholder="템플릿 이름 입력" class="flex-1 bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 focus:outline-none focus:border-blue-500">
                     <button onclick="saveCurrentAsTemplate()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1.5 whitespace-nowrap">
@@ -260,12 +253,9 @@
                     </button>
                 </div>
 
-                <!-- Template List -->
                 <div id="template-list" class="space-y-2.5 max-h-60 overflow-y-auto pr-1">
-                    <!-- Dynamic rendering via JS -->
                 </div>
 
-                <!-- JSON Import / Export Section (Card 5: T03-C22 ~ C24) -->
                 <div class="pt-4 border-t border-slate-800 space-y-3">
                     <h4 class="text-xs font-bold text-slate-300 uppercase tracking-wider">
                         JSON 백업 / 불러오기 (T03-C22~C24)
@@ -280,7 +270,6 @@
                         </label>
                     </div>
 
-                    <!-- JSON Corruption Test Helper Buttons -->
                     <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-[11px] space-y-2">
                         <span class="text-slate-400 font-semibold block">JSON 예외 테스트 (C23, C24 통과용):</span>
                         <div class="flex gap-2">
@@ -295,36 +284,13 @@
                 </div>
             </div>
 
-            <!-- PANEL 3: 12 EXTREME TEST SUITE (Card 3: T03-C14 ~ C16) -->
-            <div id="panel-qa" class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4 hidden">
-                <div class="flex items-center justify-between">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-microscope text-indigo-400"></i>
-                        극단 입력 12건 검사 (T03-C14~C16)
-                    </h3>
-                    <button onclick="runAllQATests()" class="px-3 py-1 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-semibold transition-all flex items-center gap-1">
-                        <i class="fa-solid fa-play text-[10px]"></i> 전체 실행
-                    </button>
-                </div>
-                <p class="text-xs text-slate-400">
-                    아래 검사 항목을 클릭하면 극단적인 데이터 조건이 적용되며 안전하게 동작하는지 검증합니다.
-                </p>
-
-                <!-- 12 Test Cases List -->
-                <div class="space-y-2 max-h-[380px] overflow-y-auto pr-1" id="qa-test-list">
-                    <!-- Generated via JS -->
-                </div>
-            </div>
-
         </section>
 
-        <!-- RIGHT PANEL: Live Preview Canvas & Parity Monitor (7 Cols) -->
+        <!-- RIGHT PANEL: Live Preview Canvas -->
         <section class="lg:col-span-7 flex flex-col gap-6">
 
-            <!-- Real-time Preview Stage Container -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 flex flex-col items-center justify-center min-h-[520px] relative overflow-hidden">
                 
-                <!-- Status Badge Header -->
                 <div class="w-full flex items-center justify-between mb-4 pb-3 border-b border-slate-800 text-xs">
                     <div class="flex items-center space-x-2">
                         <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -334,100 +300,59 @@
                     <span class="text-slate-400 hidden sm:inline text-[11px]">내려받은 파일과 100% 일치 (T03-C11~C13)</span>
                 </div>
 
-                <!-- Canvas Wrapper Box -->
                 <div id="canvas-container" class="relative flex items-center justify-center max-w-full max-h-[550px] transition-all duration-300 my-auto">
-                    <!-- HTML5 Canvas Element -->
                     <canvas id="meme-canvas" class="canvas-wrapper rounded-lg bg-slate-950 border border-slate-800 max-w-full max-h-[500px] object-contain cursor-grab active:cursor-grabbing"></canvas>
                 </div>
 
                 <p class="text-[11px] text-slate-500 mt-4 text-center">
-                    💡 캔버스 위 문구를 드래그하거나 위치 슬라이더를 통해 문구 위치를 자유롭게 조정할 수 있습니다.
+                    💡 캔버스 위 문구를 마우스/터치로 드래그하거나 슬라이더를 통해 문구 위치를 자유롭게 조정할 수 있습니다.
                 </p>
             </div>
 
-            <!-- Bottom Multi-Tabs: Verification Docs & Showcase Gallery -->
+            <!-- SHOWCASE GALLERY -->
             <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
-                <div class="flex border-b border-slate-800 pb-3 gap-4 text-xs font-bold">
-                    <button onclick="switchBottomTab('gallery')" id="btab-gallery-btn" class="text-blue-400 border-b-2 border-blue-500 pb-2">
+                <div class="flex border-b border-slate-800 pb-3 text-xs font-bold">
+                    <span class="text-blue-400 border-b-2 border-blue-500 pb-2">
                         <i class="fa-solid fa-images mr-1"></i> 완성 이미지 3종 갤러리 (Card 5)
-                    </button>
-                    <button onclick="switchBottomTab('verify')" id="btab-verify-btn" class="text-slate-400 hover:text-white pb-2">
-                        <i class="fa-solid fa-clipboard-check mr-1"></i> 제출용 검증 및 판단 4줄·3줄 (C31, C32)
-                    </button>
+                    </span>
                 </div>
 
-                <!-- TAB: SHOWCASE GALLERY (Card 5: T03-C25 ~ C27) -->
-                <div id="bpanel-gallery" class="space-y-4">
-                    <div class="grid grid-cols-3 gap-3">
-                        <!-- Gallery Item 1 -->
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
-                            <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
-                                <canvas id="gallery-canvas-1" class="w-full h-full object-cover"></canvas>
-                                <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">1:1 정사각형</span>
-                            </div>
-                            <div class="text-[11px] text-left space-y-1">
-                                <p class="font-bold text-slate-200 truncate">개발자의 하루 (밈 카드)</p>
-                                <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
-                                <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
-                            </div>
+                <div class="grid grid-cols-3 gap-3">
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
+                        <div class="aspect-square bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
+                            <canvas id="gallery-canvas-1" class="w-full h-full object-cover"></canvas>
+                            <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">1:1 정사각형</span>
                         </div>
-
-                        <!-- Gallery Item 2 -->
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
-                            <div class="aspect-[4/5] bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
-                                <canvas id="gallery-canvas-2" class="w-full h-full object-cover"></canvas>
-                                <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">4:5 카드뉴스</span>
-                            </div>
-                            <div class="text-[11px] text-left space-y-1">
-                                <p class="font-bold text-slate-200 truncate">오늘의 코딩 꿀팁</p>
-                                <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
-                                <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
-                            </div>
-                        </div>
-
-                        <!-- Gallery Item 3 -->
-                        <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
-                            <div class="aspect-[9/16] bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
-                                <canvas id="gallery-canvas-3" class="w-full h-full object-cover"></canvas>
-                                <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">9:16 스토리</span>
-                            </div>
-                            <div class="text-[11px] text-left space-y-1">
-                                <p class="font-bold text-slate-200 truncate">금요일 퇴근 10분 전</p>
-                                <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
-                                <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
-                            </div>
+                        <div class="text-[11px] text-left space-y-1">
+                            <p class="font-bold text-slate-200 truncate">개발자의 하루 (밈 카드)</p>
+                            <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
+                            <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
                         </div>
                     </div>
-                </div>
 
-                <!-- TAB: SUBMISSION REPORT (T03-C31, T03-C32) -->
-                <div id="bpanel-verify" class="space-y-4 hidden text-xs">
-                    
-                    <!-- 4-Line Quick Verification (T03-C31) -->
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-bold text-blue-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-list-check"></i> 짧은 확인 방법 4줄 (T03-C31)
-                        </h4>
-                        <ol class="space-y-1.5 text-slate-300 leading-relaxed list-decimal list-inside">
-                            <li><strong class="text-white">① 어디로 가나요:</strong> 무로그인 공개 웹 편집기 메인 화면 (계정/인증 없이 시크릿 창 즉시 접속)</li>
-                            <li><strong class="text-white">② 3단계 이내 무엇을 하나요:</strong> 1단계: [배경 선택 및 화면비 설정] ➔ 2단계: [문구 입력 및 위치 조정] ➔ 3단계: [PNG/JPG 다운로드]</li>
-                            <li><strong class="text-white">③ 무엇이 보이면 통과인가요:</strong> 1:1, 4:5, 9:16 미리보기 화면과 다운로드된 고화질 완성 파일의 이미지 잘림, 문구 위치, 줄바꿈이 100% 일치함</li>
-                            <li><strong class="text-white">④ 안 될 때 무엇이 보이나요:</strong> 지원하지 않는 파일(exe 등)이나 문법이 손상된 JSON 업로드 시 붉은색 알림 팝업이 뜨며, 기존 작성 중이던 작업이 파괴되지 않고 안전하게 유지됨</li>
-                        </ol>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
+                        <div class="aspect-[4/5] bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
+                            <canvas id="gallery-canvas-2" class="w-full h-full object-cover"></canvas>
+                            <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">4:5 카드뉴스</span>
+                        </div>
+                        <div class="text-[11px] text-left space-y-1">
+                            <p class="font-bold text-slate-200 truncate">오늘의 코딩 꿀팁</p>
+                            <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
+                            <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
+                        </div>
                     </div>
 
-                    <!-- 3-Line AI Collaboration Judgment (T03-C32) -->
-                    <div class="bg-slate-950 p-4 rounded-xl border border-slate-800 space-y-2">
-                        <h4 class="font-bold text-emerald-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-brain"></i> AI와 나의 판단 3줄 (T03-C32)
-                        </h4>
-                        <ul class="space-y-1.5 text-slate-300 leading-relaxed list-disc list-inside">
-                            <li><strong class="text-white">① AI에게 맡긴 일:</strong> HTML5 Canvas 기반의 텍스트 워드랩(줄바꿈) 알고리즘 구현, 메타데이터 세척(EXIF Scrubbing) 코드 및 JSON 스키마 검증 로직 작성</li>
-                            <li><strong class="text-white">② 학생이 직접 판단한 일:</strong> 1:1, 4:5, 9:16 화면비 간 디바이스 미리보기 및 파일 간 일치성 검증 기준 수립, 12건 극단 테스트 시나리오 정의 및 결함 수정 이력 검증</li>
-                            <li><strong class="text-white">③ AI 제안을 따르지 않은 일:</strong> AI는 무거운 외부 라이브러리(Fabric.js) 도입을 권장했으나, 단일 파일 완전성 및 빠른 로딩 성능 확보를 위해 순수 Canvas API 표준 제어 방식을 채택함</li>
-                        </ul>
+                    <div class="bg-slate-950 p-2.5 rounded-xl border border-slate-800 text-center space-y-2">
+                        <div class="aspect-[9/16] bg-slate-900 rounded-lg overflow-hidden relative border border-slate-800">
+                            <canvas id="gallery-canvas-3" class="w-full h-full object-cover"></canvas>
+                            <span class="absolute top-1 left-1 bg-black/70 text-[10px] text-white px-1.5 py-0.5 rounded">9:16 스토리</span>
+                        </div>
+                        <div class="text-[11px] text-left space-y-1">
+                            <p class="font-bold text-slate-200 truncate">금요일 퇴근 10분 전</p>
+                            <p class="text-slate-400 text-[10px]">출처: 본인 직접 제작 (HTML5 Canvas)</p>
+                            <span class="inline-block px-1.5 py-0.5 bg-emerald-950 border border-emerald-800 text-emerald-300 text-[9px] rounded">EXIF 0건 Clean</span>
+                        </div>
                     </div>
-
                 </div>
             </div>
 
@@ -435,10 +360,8 @@
 
     </main>
 
-    <!-- Global Toast Notification Container -->
     <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md pointer-events-none"></div>
 
-    <!-- Modal Dialog Component -->
     <div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
         <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 text-slate-200">
             <h3 id="modal-title" class="text-base font-bold text-white flex items-center gap-2"></h3>
@@ -449,11 +372,7 @@
         </div>
     </div>
 
-    <!-- MAIN JAVASCRIPT APP ENGINE -->
     <script>
-        /**
-         * STATE MANAGEMENT
-         */
         const AppState = {
             aspectRatio: '1:1',
             dimensions: { width: 1080, height: 1080 },
@@ -470,7 +389,6 @@
             isDragging: false
         };
 
-        // Templates Store (Local Storage Backed)
         let templatesStore = [
             {
                 id: 'tpl-default-1',
@@ -482,7 +400,8 @@
                 textColor: '#ffffff',
                 strokeColor: '#000000',
                 textAlign: 'center',
-                posY: 80
+                posY: 80,
+                posX: 50
             },
             {
                 id: 'tpl-default-2',
@@ -494,7 +413,8 @@
                 textColor: '#fef08a',
                 strokeColor: '#1e293b',
                 textAlign: 'center',
-                posY: 50
+                posY: 50,
+                posX: 50
             },
             {
                 id: 'tpl-default-3',
@@ -506,37 +426,17 @@
                 textColor: '#ffffff',
                 strokeColor: '#dc2626',
                 textAlign: 'center',
-                posY: 25
+                posY: 25,
+                posX: 50
             }
         ];
 
-        // 12 QA Extreme Tests Data (T03-C14 ~ C16)
-        const qaTestCases = [
-            { id: 1, title: '긴 한글 텍스트', text: '이 문장은 매우 긴 한글 텍스트로서 캔버스 영역 바깥으로 텍스트가 삐져나가지 않고 자동으로 줄바꿈이 정상 처리되는지 확인하는 극단적 테스트용 문구입니다.', type: 'string' },
-            { id: 2, title: '한영 혼합 문구', text: 'Meme & Card Studio 짤·카드 스튜디오 Version 2.0 Released! 🔥', type: 'string' },
-            { id: 3, title: '다중 줄바꿈', text: '첫번째 줄\n두번째 줄\n\n네번째 줄 (공백 포함)', type: 'string' },
-            { id: 4, title: '이모지 및 특수문자', text: '🎉 밈 스튜디오 ✨ ❤️ 🚀 💯 [!]@#$%^&*()', type: 'string' },
-            { id: 5, title: '빈 문구 처리', text: '', type: 'string' },
-            { id: 6, title: '세로 비율 이미지 테스트', act: () => setAspectRatio('9:16'), type: 'aspect' },
-            { id: 7, title: '가로/정사각 비율 테스트', act: () => setAspectRatio('1:1'), type: 'aspect' },
-            { id: 8, title: '투명 PNG 이미지 합성', act: () => loadSyntheticImage('transparent'), type: 'image' },
-            { id: 9, title: '공백없는 초장문 (Word-wrap)', text: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789VERYLONGSINGLESTRINGWITHOUTSPACE', type: 'string' },
-            { id: 10, title: 'HTML/XSS 태그 인젝션 문구', text: '<script>alert("xss")<\/script><b>Bold Text Test</b>', type: 'string' },
-            { id: 11, title: '극단적 폰트 크기 (140px)', act: () => { AppState.fontSize = 140; document.getElementById('font-size-slider').value = 140; updateCanvas(); }, type: 'style' },
-            { id: 12, title: '지원하지 않는 파일 업로드 시도 (C09, C10)', act: () => simulateInvalidFileUpload(), type: 'file_reject', hasFixLog: true }
-        ];
-
-        // Canvas element reference
         let canvas, ctx;
 
-        /**
-         * INITIALIZATION ON WINDOW LOAD
-         */
         window.onload = function() {
             canvas = document.getElementById('meme-canvas');
             ctx = canvas.getContext('2d');
 
-            // Load saved local templates if any
             const savedTemplates = localStorage.getItem('meme_studio_templates');
             if (savedTemplates) {
                 try {
@@ -551,51 +451,36 @@
                 saveTemplatesToLocalStorage();
             }
 
-            // Sync initial state to form inputs
             document.getElementById('text-input').value = AppState.text;
-            
-            // Generate Initial Canvas Background Image (Synthetic pattern)
             generateDefaultBgImage();
-
-            // Render Template List & QA Test Suite
             renderTemplatesList();
-            renderQATestSuite();
             initShowcaseGallery();
-
-            // Set up Drag & Drop events on canvas
             initCanvasEvents();
-
-            // Initial Draw
             setAspectRatio('1:1');
         };
 
-        /**
-         * CANVAS RENDER ENGINE
-         */
         function updateCanvas() {
             if (!canvas || !ctx) return;
 
-            // Update AppState from Inputs
             AppState.text = document.getElementById('text-input').value;
             AppState.fontSize = parseInt(document.getElementById('font-size-slider').value);
             AppState.fontFamily = document.getElementById('font-family-select').value;
             AppState.textColor = document.getElementById('text-color').value;
             AppState.strokeColor = document.getElementById('stroke-color').value;
             AppState.posY = parseInt(document.getElementById('pos-y-slider').value);
+            AppState.posX = parseInt(document.getElementById('pos-x-slider').value);
 
-            // Sync Hex text inputs & UI badges
             document.getElementById('text-color-hex').value = AppState.textColor;
             document.getElementById('stroke-color-hex').value = AppState.strokeColor;
             document.getElementById('font-size-val').innerText = `${AppState.fontSize}px`;
             document.getElementById('pos-y-val').innerText = `${AppState.posY}%`;
+            document.getElementById('pos-x-val').innerText = `${AppState.posX}%`;
 
-            // Canvas Native Dimensions
             const W = AppState.dimensions.width;
             const H = AppState.dimensions.height;
             canvas.width = W;
             canvas.height = H;
 
-            // 1. Draw Background (Image or Fallback Gradient)
             ctx.clearRect(0, 0, W, H);
             if (AppState.bgImage && AppState.bgImage.complete) {
                 const img = AppState.bgImage;
@@ -623,17 +508,13 @@
                 ctx.fillRect(0, 0, W, H);
             }
 
-            // 2. Draw Text Overlay
             if (AppState.text.trim().length > 0) {
                 ctx.save();
                 ctx.font = `bold ${AppState.fontSize}px "${AppState.fontFamily}", sans-serif`;
                 ctx.textAlign = AppState.textAlign;
                 ctx.textBaseline = 'middle';
 
-                let xPos = W * 0.5;
-                if (AppState.textAlign === 'left') xPos = W * 0.08;
-                if (AppState.textAlign === 'right') xPos = W * 0.92;
-
+                const xPos = W * (AppState.posX / 100);
                 const yPos = H * (AppState.posY / 100);
 
                 const maxLineWidth = W * 0.88;
@@ -695,9 +576,6 @@
             }
         }
 
-        /**
-         * ASPECT RATIO CONTROLLER (Card 2: T03-C11 ~ C13)
-         */
         function setAspectRatio(ratio) {
             AppState.aspectRatio = ratio;
             
@@ -731,17 +609,14 @@
             updateCanvas();
         }
 
-        /**
-         * FILE UPLOAD & EXIF METADATA SCRUBBER (Card 1: T03-C04, C05, C09, C10, C28)
-         */
         function handleImageUpload(event) {
             const file = event.target.files[0];
             if (!file) return;
 
             const validTypes = ['image/png', 'image/jpeg', 'image/jpg'];
             if (!validTypes.includes(file.type.toLowerCase())) {
-                showToast(`[업로드 거부] 지원하지 않는 파일 형식입니다 (${file.type || '알 수 없음'}). PNG 또는 JPEG 파일만 업로드 가능합니다. (T03-C10)`, 'error');
-                showModal('지원하지 않는 파일 형식', `선택하신 파일(${file.name})은 이미지(PNG/JPEG) 형식이 아닙니다.<br><br><b>보안 및 호환성을 위해 업로드가 거부되었으며, 기존 진행중인 작업 내용은 그대로 유지됩니다. (T03-C09)</b>`);
+                showToast(`[업로드 거부] 지원하지 않는 파일 형식입니다 (${file.type || '알 수 없음'}). PNG 또는 JPEG 파일만 업로드 가능합니다.`, 'error');
+                showModal('지원하지 않는 파일 형식', `선택하신 파일(${file.name})은 이미지(PNG/JPEG) 형식이 아닙니다.<br><br><b>보안 및 호환성을 위해 업로드가 거부되었으며, 기존 진행중인 작업 내용은 그대로 유지됩니다.</b>`);
                 event.target.value = '';
                 return;
             }
@@ -770,9 +645,6 @@
             reader.readAsDataURL(file);
         }
 
-        /**
-         * SYNTHETIC SAMPLE IMAGE GENERATOR
-         */
         function generateDefaultBgImage() {
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 1080;
@@ -809,32 +681,6 @@
             showToast('기본 샘플 배경이 적용되었습니다.', 'info');
         }
 
-        function loadSyntheticImage(type) {
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = 800;
-            tempCanvas.height = 800;
-            const tCtx = tempCanvas.getContext('2d');
-
-            if (type === 'transparent') {
-                tCtx.clearRect(0, 0, 800, 800);
-                tCtx.fillStyle = '#10b981';
-                tCtx.beginPath();
-                tCtx.arc(400, 400, 250, 0, Math.PI * 2);
-                tCtx.fill();
-            }
-
-            const img = new Image();
-            img.onload = function() {
-                AppState.bgImage = img;
-                updateCanvas();
-                showToast(`테스트 배경 이미지(${type})가 적용되었습니다.`, 'success');
-            };
-            img.src = tempCanvas.toDataURL('image/png');
-        }
-
-        /**
-         * DOWNLOAD FILE GENERATOR (Card 2: T03-C11~C13 Parity)
-         */
         function downloadImage(format) {
             updateCanvas();
 
@@ -851,13 +697,10 @@
                 a.click();
                 document.body.removeChild(a);
                 URL.revokeObjectURL(url);
-                showToast(`${format.toUpperCase()} 고화질 이미지가 성공적으로 다운로드되었습니다! (미리보기 100% 일치)`, 'success');
+                showToast(`${format.toUpperCase()} 고화질 이미지가 성공적으로 다운로드되었습니다!`, 'success');
             }, mimeType, 0.95);
         }
 
-        /**
-         * TEMPLATE CRUD LOGIC (Card 4: T03-C17 ~ C21)
-         */
         function renderTemplatesList() {
             const container = document.getElementById('template-list');
             container.innerHTML = '';
@@ -874,10 +717,10 @@
                         <p class="text-[11px] text-slate-500 truncate max-w-[200px] mt-0.5">${tpl.text.replace(/\n/g, ' ')}</p>
                     </div>
                     <div class="flex items-center gap-1">
-                        <button onclick="updateTemplate('${tpl.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs transition-all" title="현재 상태로 수정 (C19)">
+                        <button onclick="updateTemplate('${tpl.id}')" class="p-1.5 text-slate-400 hover:text-amber-400 text-xs transition-all" title="현재 상태로 수정">
                             <i class="fa-solid fa-pen"></i>
                         </button>
-                        <button onclick="deleteTemplate('${tpl.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs transition-all" title="삭제 (C20)">
+                        <button onclick="deleteTemplate('${tpl.id}')" class="p-1.5 text-slate-400 hover:text-rose-400 text-xs transition-all" title="삭제">
                             <i class="fa-solid fa-trash"></i>
                         </button>
                     </div>
@@ -900,14 +743,15 @@
                 textColor: AppState.textColor,
                 strokeColor: AppState.strokeColor,
                 textAlign: AppState.textAlign,
-                posY: AppState.posY
+                posY: AppState.posY,
+                posX: AppState.posX
             };
 
             templatesStore.unshift(newTpl);
             saveTemplatesToLocalStorage();
             renderTemplatesList();
             input.value = '';
-            showToast(`템플릿 '${name}'이(가) 저장되었습니다. (T03-C17)`, 'success');
+            showToast(`템플릿 '${name}'이(가) 저장되었습니다.`, 'success');
         }
 
         function loadTemplate(id) {
@@ -922,6 +766,7 @@
             AppState.strokeColor = tpl.strokeColor;
             AppState.textAlign = tpl.textAlign;
             AppState.posY = tpl.posY;
+            AppState.posX = tpl.posX !== undefined ? tpl.posX : 50;
 
             document.getElementById('text-input').value = AppState.text;
             document.getElementById('font-size-slider').value = AppState.fontSize;
@@ -929,9 +774,10 @@
             document.getElementById('text-color').value = AppState.textColor;
             document.getElementById('stroke-color').value = AppState.strokeColor;
             document.getElementById('pos-y-slider').value = AppState.posY;
+            document.getElementById('pos-x-slider').value = AppState.posX;
 
             updateCanvas();
-            showToast(`템플릿 '${tpl.name}'을(를) 불러왔습니다. (T03-C18)`, 'info');
+            showToast(`템플릿 '${tpl.name}'을(를) 불러왔습니다.`, 'info');
         }
 
         function updateTemplate(id) {
@@ -947,12 +793,13 @@
                 textColor: AppState.textColor,
                 strokeColor: AppState.strokeColor,
                 textAlign: AppState.textAlign,
-                posY: AppState.posY
+                posY: AppState.posY,
+                posX: AppState.posX
             };
 
             saveTemplatesToLocalStorage();
             renderTemplatesList();
-            showToast(`템플릿 '${templatesStore[idx].name}'이(가) 현재 설정으로 수정되었습니다. (T03-C19)`, 'success');
+            showToast(`템플릿 '${templatesStore[idx].name}'이(가) 현재 설정으로 수정되었습니다.`, 'success');
         }
 
         function deleteTemplate(id) {
@@ -962,16 +809,13 @@
             templatesStore = templatesStore.filter(t => t.id !== id);
             saveTemplatesToLocalStorage();
             renderTemplatesList();
-            showToast(`템플릿 '${tpl.name}'이(가) 삭제되었습니다. (T03-C20)`, 'warning');
+            showToast(`템플릿 '${tpl.name}'이(가) 삭제되었습니다.`, 'warning');
         }
 
         function saveTemplatesToLocalStorage() {
             localStorage.setItem('meme_studio_templates', JSON.stringify(templatesStore));
         }
 
-        /**
-         * JSON IMPORT / EXPORT & SCHEMA VALIDATION (Card 5: T03-C22 ~ C24)
-         */
         function exportTemplateJSON() {
             const exportData = {
                 schemaVersion: "1.0",
@@ -985,7 +829,8 @@
                     textColor: AppState.textColor,
                     strokeColor: AppState.strokeColor,
                     textAlign: AppState.textAlign,
-                    posY: AppState.posY
+                    posY: AppState.posY,
+                    posX: AppState.posX
                 }
             };
 
@@ -1017,15 +862,15 @@
             try {
                 parsed = JSON.parse(rawContent);
             } catch (err) {
-                showModal('JSON 불러오기 오류 (T03-C23)', '선택한 파일의 문법이 손상되었거나 올바른 JSON 형식이 아닙니다.<br><br><span class="text-rose-400 font-mono text-[11px]">' + err.message + '</span><br><br><b>보안을 위해 저장이 거부되었으며 기존 템플릿 작업 내용이 그대로 유지됩니다.</b>');
-                showToast('[거부] 손상된 JSON 문법입니다. (C23)', 'error');
+                showModal('JSON 불러오기 오류', '선택한 파일의 문법이 손상되었거나 올바른 JSON 형식이 아닙니다.<br><br><span class="text-rose-400 font-mono text-[11px]">' + err.message + '</span><br><br><b>보안을 위해 저장이 거부되었으며 기존 템플릿 작업 내용이 그대로 유지됩니다.</b>');
+                showToast('[거부] 손상된 JSON 문법입니다.', 'error');
                 return;
             }
 
             const tpl = parsed.template || parsed;
             if (!tpl || typeof tpl.text === 'undefined' || typeof tpl.aspectRatio === 'undefined' || typeof tpl.fontSize === 'undefined') {
-                showModal('JSON 필수 항목 누락 (T03-C24)', 'JSON 파일 구조에 필수 속성(text, aspectRatio, fontSize 등)이 누락되었습니다.<br><br><b>유효하지 않은 데이터이므로 저장이 거부되었으며 기존 템플릿 작업이 안전하게 유지됩니다.</b>');
-                showToast('[거부] 필수 항목이 누락된 JSON입니다. (C24)', 'error');
+                showModal('JSON 필수 항목 누락', 'JSON 파일 구조에 필수 속성(text, aspectRatio, fontSize 등)이 누락되었습니다.<br><br><b>유효하지 않은 데이터이므로 저장이 거부되었으며 기존 템플릿 작업이 안전하게 유지됩니다.</b>');
+                showToast('[거부] 필수 항목이 누락된 JSON입니다.', 'error');
                 return;
             }
 
@@ -1037,6 +882,7 @@
             AppState.strokeColor = tpl.strokeColor || '#000000';
             AppState.textAlign = tpl.textAlign || 'center';
             AppState.posY = tpl.posY !== undefined ? tpl.posY : 80;
+            AppState.posX = tpl.posX !== undefined ? tpl.posX : 50;
 
             document.getElementById('text-input').value = AppState.text;
             document.getElementById('font-size-slider').value = AppState.fontSize;
@@ -1044,9 +890,10 @@
             document.getElementById('text-color').value = AppState.textColor;
             document.getElementById('stroke-color').value = AppState.strokeColor;
             document.getElementById('pos-y-slider').value = AppState.posY;
+            document.getElementById('pos-x-slider').value = AppState.posX;
 
             updateCanvas();
-            showToast('정상 JSON 템플릿이 성공적으로 복원되었습니다! (T03-C22)', 'success');
+            showToast('정상 JSON 템플릿이 성공적으로 복원되었습니다!', 'success');
         }
 
         function testBadJsonSyntax() {
@@ -1059,74 +906,6 @@
             processJSONImport(missingFields);
         }
 
-        /**
-         * 12 EXTREME TEST SUITE LOGIC (Card 3: T03-C14 ~ C16)
-         */
-        function renderQATestSuite() {
-            const container = document.getElementById('qa-test-list');
-            container.innerHTML = '';
-
-            qaTestCases.forEach(tc => {
-                const div = document.createElement('div');
-                div.className = "bg-slate-950 p-3 rounded-xl border border-slate-800 space-y-2";
-                div.innerHTML = `
-                    <div class="flex items-center justify-between">
-                        <span class="text-xs font-bold text-slate-200">#${tc.id}. ${tc.title}</span>
-                        <div class="flex items-center gap-1.5">
-                            ${tc.hasFixLog ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300 border border-amber-500/30">FAIL ➔ PASS 수정이력</span>` : ''}
-                            <button onclick="runSingleQATest(${tc.id})" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 text-blue-400 text-[11px] font-medium rounded-lg transition-all">
-                                실행
-                            </button>
-                        </div>
-                    </div>
-                    ${tc.text !== undefined ? `<p class="text-[11px] font-mono bg-slate-900 p-2 rounded text-slate-400 truncate">${tc.text || '(빈 문자열)'}</p>` : ''}
-                `;
-                container.appendChild(div);
-            });
-        }
-
-        function runSingleQATest(id) {
-            const tc = qaTestCases.find(t => t.id === id);
-            if (!tc) return;
-
-            if (tc.type === 'string') {
-                AppState.text = tc.text;
-                document.getElementById('text-input').value = tc.text;
-                updateCanvas();
-                showToast(`검사 #${tc.id} (${tc.title}) 적용 완료 - PASS`, 'success');
-            } else if (tc.act) {
-                tc.act();
-                showToast(`검사 #${tc.id} (${tc.title}) 적용 완료 - PASS`, 'success');
-            }
-        }
-
-        function runAllQATests() {
-            showToast('12건 극단 입력 테스트를 일괄 검사합니다...', 'info');
-            let idx = 0;
-            const timer = setInterval(() => {
-                if (idx >= qaTestCases.length) {
-                    clearInterval(timer);
-                    showToast('🎉 12건 극단 입력 검사 완료! 모든 에지케이스 통과 (T03-C14, C15, C16)', 'success');
-                    return;
-                }
-                runSingleQATest(qaTestCases[idx].id);
-                idx++;
-            }, 400);
-        }
-
-        function simulateInvalidFileUpload() {
-            const fakeEvent = {
-                target: {
-                    files: [{ name: 'malicious_virus.exe', type: 'application/x-msdownload' }],
-                    value: 'loaded'
-                }
-            };
-            handleImageUpload(fakeEvent);
-        }
-
-        /**
-         * SHOWCASE GALLERY RENDERER (Card 5: T03-C25 ~ C27)
-         */
         function initShowcaseGallery() {
             setTimeout(() => {
                 renderGalleryCanvas('gallery-canvas-1', '1:1', "개발자의 하루:\n버그가 안 잡힌다...", '#ffffff', '#1e293b');
@@ -1164,18 +943,24 @@
             });
         }
 
-        /**
-         * INTERACTIVE CANVAS DRAGGING & EVENTS
-         */
         function initCanvasEvents() {
             let isDragging = false;
 
-            const getCanvasYPercent = (e) => {
+            const getCanvasCoordsPercent = (e) => {
                 const rect = canvas.getBoundingClientRect();
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                const offsetX = clientX - rect.left;
                 const offsetY = clientY - rect.top;
-                let pct = Math.round((offsetY / rect.height) * 100);
-                return Math.max(5, Math.min(95, pct));
+
+                let pctX = Math.round((offsetX / rect.width) * 100);
+                let pctY = Math.round((offsetY / rect.height) * 100);
+
+                return {
+                    x: Math.max(5, Math.min(95, pctX)),
+                    y: Math.max(5, Math.min(95, pctY))
+                };
             };
 
             const onStart = (e) => {
@@ -1184,9 +969,11 @@
 
             const onMove = (e) => {
                 if (!isDragging) return;
-                const newY = getCanvasYPercent(e);
-                AppState.posY = newY;
-                document.getElementById('pos-y-slider').value = newY;
+                const coords = getCanvasCoordsPercent(e);
+                AppState.posX = coords.x;
+                AppState.posY = coords.y;
+                document.getElementById('pos-x-slider').value = coords.x;
+                document.getElementById('pos-y-slider').value = coords.y;
                 updateCanvas();
             };
 
@@ -1203,17 +990,12 @@
             window.addEventListener('touchend', onEnd);
         }
 
-        /**
-         * UI TAB SWITCHERS & HELPERS
-         */
         function switchLeftTab(tab) {
             document.getElementById('panel-editor').classList.add('hidden');
             document.getElementById('panel-templates').classList.add('hidden');
-            document.getElementById('panel-qa').classList.add('hidden');
 
             document.getElementById('tab-editor-btn').className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all";
             document.getElementById('tab-template-btn').className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all";
-            document.getElementById('tab-qa-btn').className = "flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all";
 
             if (tab === 'editor') {
                 document.getElementById('panel-editor').classList.remove('hidden');
@@ -1221,25 +1003,6 @@
             } else if (tab === 'templates') {
                 document.getElementById('panel-templates').classList.remove('hidden');
                 document.getElementById('tab-template-btn').className = "flex-1 py-2 rounded-lg bg-blue-600 text-white transition-all";
-            } else if (tab === 'qa') {
-                document.getElementById('panel-qa').classList.remove('hidden');
-                document.getElementById('tab-qa-btn').className = "flex-1 py-2 rounded-lg bg-blue-600 text-white transition-all";
-            }
-        }
-
-        function switchBottomTab(tab) {
-            document.getElementById('bpanel-gallery').classList.add('hidden');
-            document.getElementById('bpanel-verify').classList.add('hidden');
-
-            document.getElementById('btab-gallery-btn').className = "text-slate-400 hover:text-white pb-2";
-            document.getElementById('btab-verify-btn').className = "text-slate-400 hover:text-white pb-2";
-
-            if (tab === 'gallery') {
-                document.getElementById('bpanel-gallery').classList.remove('hidden');
-                document.getElementById('btab-gallery-btn').className = "text-blue-400 border-b-2 border-blue-500 pb-2";
-            } else {
-                document.getElementById('bpanel-verify').classList.remove('hidden');
-                document.getElementById('btab-verify-btn').className = "text-blue-400 border-b-2 border-blue-500 pb-2";
             }
         }
 
