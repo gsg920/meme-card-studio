@@ -128,6 +128,7 @@ input[type=range] { accent-color:var(--ac); }
                         <div id="rot" title="드래그해서 회전 (Shift: 15° 단위)"><i class="fa-solid fa-rotate"></i></div>
                     </div>
                     <textarea id="edit" spellcheck="false"></textarea>
+                    <div id="empty-hint" style="position:absolute;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:6px;pointer-events:none;color:#a3a9b8;font-size:14px;text-align:center;line-height:1.6"><i class="fa-regular fa-hand-pointer" style="font-size:26px"></i><div>왼쪽에서 <b>템플릿</b>을 고르거나<br><b>텍스트·사진·요소</b>를 추가해 시작하세요</div></div>
                 </div>
             </div>
         </div>
@@ -288,6 +289,7 @@ function render() {
     const dpr = window.devicePixelRatio || 1;
     cv.style.width = doc.w * zoom + 'px'; cv.style.height = doc.h * zoom + 'px';
     renderDoc(cv, doc, zoom * dpr, editing);
+    $('#empty-hint').style.display = doc.objs.length || doc.bg.type !== 'color' ? 'none' : 'flex';
     cv.style.width = doc.w * zoom + 'px'; cv.style.height = doc.h * zoom + 'px';
     updateOverlay();
 }
@@ -847,7 +849,6 @@ async function restoreImages() {
             if (saved.bg && saved.bg.type === 'image' && IMGS.has(saved.bg.imgId)) doc.bg = { type: 'image', c1: doc.bg.c1, c2: doc.bg.c2, imgId: saved.bg.imgId };
         }
     }
-    if (!doc.objs.length && !saved) { applyTemplate(BUILTIN[0], '제목 없는 디자인'); doc.name = '제목 없는 디자인'; }
     syncDocUI(); buildToolbar(); renderPanel(); fit(); pushHistory(); updUndo();
     await Promise.all(FONT_IDS.map(f => document.fonts.load(`bold 48px "${f}"`).catch(() => { })));
     thumbCache.clear(); render(); renderPanel(); await buildGallery();
