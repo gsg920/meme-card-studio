@@ -1,0 +1,1317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>짤·카드 스튜디오 (Meme & Card Studio)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Gowun+Dodum&family=Jua&family=Nanum+Pen+Script&family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: { extend: { fontFamily: { sans: ['Noto Sans KR', 'sans-serif'] } } }
+        }
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .btn { @apply px-3 py-2 rounded-xl border border-slate-700 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium transition-all inline-flex items-center justify-center gap-1.5 disabled:opacity-40 disabled:cursor-not-allowed; }
+            .btn-primary { @apply border-blue-500 bg-blue-600 hover:bg-blue-500 text-white font-bold; }
+            .btn-ok { @apply border-emerald-600 bg-emerald-600 hover:bg-emerald-500 text-white font-bold; }
+            .inp { @apply w-full bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-blue-500; }
+            .lbl { @apply block text-[11px] text-slate-400 mb-1; }
+            .sec { @apply text-xs font-semibold text-slate-400 uppercase tracking-wider; }
+            .seg { @apply flex-1 py-1.5 rounded-lg border border-slate-700 bg-slate-800/50 text-slate-400 text-xs font-semibold transition-all hover:border-slate-500; }
+            .seg-on { @apply border-blue-500 bg-blue-500/15 text-blue-300; }
+            .tab { @apply flex-1 py-2 rounded-lg text-slate-400 hover:text-white transition-all whitespace-nowrap px-2; }
+            .tab-on { @apply bg-blue-600 text-white; }
+            .card { @apply bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4; }
+            .pill-pass { @apply bg-emerald-950 border border-emerald-700 text-emerald-300 px-1.5 py-0.5 rounded text-[10px] font-bold; }
+            .pill-fail { @apply bg-rose-950 border border-rose-700 text-rose-300 px-1.5 py-0.5 rounded text-[10px] font-bold; }
+        }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #0f172a; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        #meme-canvas { display:block; box-shadow: 0 20px 25px -5px rgba(0,0,0,.4); touch-action: none; max-width: 100%; max-height: 52vh; width: auto; height: auto; }
+        .guide-line { position:absolute; background: rgba(34,211,238,.7); pointer-events:none; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans min-h-screen flex flex-col">
+
+<header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-wand-magic-sparkles text-lg"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-lg text-white flex items-center gap-2">
+                    짤·카드 스튜디오
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">무로그인 공개 편집기</span>
+                </h1>
+                <p class="text-xs text-slate-400">이미지 &amp; 문구 조합 밈·카드뉴스 제작 도구 · 모든 처리는 브라우저 안에서만</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-2 text-xs text-slate-400">
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">Ctrl+Z</kbd> 실행취소
+            <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-slate-700">Ctrl+S</kbd> PNG 저장
+        </div>
+    </div>
+</header>
+
+<main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+<!-- ============ LEFT ============ -->
+<section class="order-2 lg:col-span-5 flex flex-col gap-5 min-w-0 lg:sticky lg:top-20 lg:h-[calc(100vh-6.5rem)] lg:overflow-y-auto lg:pr-2">
+
+    <div class="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs font-medium overflow-x-auto sticky top-0 z-10 shrink-0">
+        <button class="tab tab-on" data-action="tab" data-tab="editor"><i class="fa-solid fa-pen-to-square mr-1"></i>편집</button>
+        <button class="tab" data-action="tab" data-tab="templates"><i class="fa-solid fa-folder-open mr-1"></i>템플릿</button>
+        <button class="tab" data-action="tab" data-tab="checks"><i class="fa-solid fa-vial-circle-check mr-1"></i>검사</button>
+        <button class="tab" data-action="tab" data-tab="submit"><i class="fa-solid fa-clipboard-check mr-1"></i>제출</button>
+    </div>
+
+    <!-- ===== EDITOR ===== -->
+    <div id="panel-editor" data-panel class="card">
+
+        <div>
+            <div class="sec mb-2">1. 화면비</div>
+            <div class="flex gap-2">
+                <button class="seg" data-action="set" data-set="aspectRatio:1:1"><i class="fa-regular fa-square mr-1"></i>1:1 피드</button>
+                <button class="seg" data-action="set" data-set="aspectRatio:4:5"><i class="fa-regular fa-note-sticky mr-1"></i>4:5 카드뉴스</button>
+                <button class="seg" data-action="set" data-set="aspectRatio:9:16"><i class="fa-solid fa-mobile-screen mr-1"></i>9:16 스토리</button>
+            </div>
+        </div>
+
+        <div class="space-y-3">
+            <div class="sec">2. 배경</div>
+            <div class="flex gap-2">
+                <button class="seg" data-action="set" data-set="bgMode:image">이미지</button>
+                <button class="seg" data-action="set" data-set="bgMode:gradient">그라디언트</button>
+                <button class="seg" data-action="set" data-set="bgMode:solid">단색</button>
+            </div>
+
+            <div data-bg="image" class="space-y-3">
+                <div class="flex gap-2">
+                    <button class="btn flex-1" data-action="upload"><i class="fa-solid fa-upload text-blue-400"></i>사진 불러오기 (PNG/JPEG)</button>
+                    <button class="btn" data-action="sample" title="샘플 배경으로 되돌리기"><i class="fa-solid fa-arrows-rotate"></i></button>
+                </div>
+                <input type="file" id="image-upload" accept="image/png,image/jpeg" class="hidden">
+                <p class="text-[11px] text-slate-500">붙여넣기(Ctrl+V)나 미리보기로 끌어다 놓기도 됩니다. 불러온 사진은 다시 그려 EXIF·GPS가 제거됩니다. <span id="bg-info" class="text-slate-400"></span></p>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="lbl">맞춤</label>
+                        <div class="flex gap-1">
+                            <button class="seg" data-action="set" data-set="imgFit:cover">꽉 채움</button>
+                            <button class="seg" data-action="set" data-set="imgFit:contain">전체 보기</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="lbl">확대 <span data-show="imgZoom" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                        <input type="range" data-k="imgZoom" min="100" max="300" class="w-full accent-blue-500">
+                    </div>
+                    <div>
+                        <label class="lbl">밝기 <span data-show="brightness" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                        <input type="range" data-k="brightness" min="20" max="200" class="w-full accent-blue-500">
+                    </div>
+                    <div>
+                        <label class="lbl">흐림 <span data-show="blur" data-unit="px" class="text-blue-400 font-mono"></span></label>
+                        <input type="range" data-k="blur" min="0" max="20" class="w-full accent-blue-500">
+                    </div>
+                </div>
+
+                <details class="bg-slate-950/60 border border-slate-800 rounded-xl p-3">
+                    <summary class="text-xs font-semibold text-slate-300 cursor-pointer">이미지 출처 기록 <span id="prov-badge" class="ml-1"></span></summary>
+                    <div class="mt-3 space-y-2">
+                        <select id="prov-type" class="inp">
+                            <option value="own">본인 제작</option>
+                            <option value="external">외부 이미지 사용</option>
+                        </select>
+                        <div id="prov-ext" class="space-y-2 hidden">
+                            <input id="prov-url" class="inp" placeholder="원본 출처 URL (https://…)">
+                            <select id="prov-basis" class="inp">
+                                <option value="라이선스명">허가 근거: 라이선스명</option>
+                                <option value="이용약관">허가 근거: 이용약관</option>
+                                <option value="수업 제공 표기">허가 근거: 수업 제공 표기</option>
+                            </select>
+                            <input id="prov-basis-text" class="inp" placeholder="예: CC BY 4.0 / Unsplash License / 3주차 제공 자료">
+                        </div>
+                        <p id="prov-msg" class="text-[11px] text-slate-500">갤러리에 저장할 때 이 기록이 함께 저장됩니다.</p>
+                    </div>
+                </details>
+            </div>
+
+            <div data-bg="gradient solid" class="grid grid-cols-2 gap-3 hidden">
+                <div>
+                    <label class="lbl">색 1</label>
+                    <div class="flex gap-2 items-center"><input type="color" data-k="bgColor1" class="w-8 h-8 bg-transparent border-0"><input data-hex-for="bgColor1" class="inp font-mono"></div>
+                </div>
+                <div data-bg="gradient">
+                    <label class="lbl">색 2</label>
+                    <div class="flex gap-2 items-center"><input type="color" data-k="bgColor2" class="w-8 h-8 bg-transparent border-0"><input data-hex-for="bgColor2" class="inp font-mono"></div>
+                </div>
+            </div>
+
+            <div>
+                <label class="lbl">배경 어둡게 (글자 가독성) <span data-show="dim" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                <input type="range" data-k="dim" min="0" max="90" class="w-full accent-blue-500">
+            </div>
+        </div>
+
+        <div class="space-y-3 pt-3 border-t border-slate-800">
+            <div class="sec">3. 문구</div>
+            <textarea id="text-input" data-k="text" rows="3" maxlength="600" class="inp text-sm p-3 rounded-xl" placeholder="짤에 들어갈 문구 (줄바꿈 가능, 최대 600자)"></textarea>
+            <div id="text-warn" class="hidden text-[11px] text-amber-300 bg-amber-950/40 border border-amber-700/50 rounded-lg px-3 py-2"></div>
+
+            <div class="flex flex-wrap gap-1.5" id="presets"></div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="lbl">글꼴</label>
+                    <select data-k="fontFamily" class="inp">
+                        <option value="Noto Sans KR">노토 산스</option>
+                        <option value="Black Han Sans">블랙한산스 (굵은 제목)</option>
+                        <option value="Jua">주아 (귀여운)</option>
+                        <option value="Gowun Dodum">고운돋움</option>
+                        <option value="Nanum Pen Script">나눔손글씨</option>
+                        <option value="Impact">Impact (글로벌 밈)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="lbl">정렬 / 굵게</label>
+                    <div class="flex gap-1">
+                        <button class="seg" data-action="set" data-set="textAlign:left"><i class="fa-solid fa-align-left"></i></button>
+                        <button class="seg" data-action="set" data-set="textAlign:center"><i class="fa-solid fa-align-center"></i></button>
+                        <button class="seg" data-action="set" data-set="textAlign:right"><i class="fa-solid fa-align-right"></i></button>
+                        <button class="seg" data-action="toggle" data-k-toggle="bold"><i class="fa-solid fa-bold"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="lbl">글자 크기 <span data-show="fontSize" data-unit="px" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="fontSize" min="12" max="140" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">줄 간격 <span data-show="lineHeight" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="lineHeight" min="80" max="220" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">문구 색</label>
+                    <div class="flex gap-2 items-center"><input type="color" data-k="textColor" class="w-8 h-8 bg-transparent border-0"><input data-hex-for="textColor" class="inp font-mono"></div>
+                </div>
+                <div>
+                    <label class="lbl">외곽선 색</label>
+                    <div class="flex gap-2 items-center"><input type="color" data-k="strokeColor" class="w-8 h-8 bg-transparent border-0"><input data-hex-for="strokeColor" class="inp font-mono"></div>
+                </div>
+                <div>
+                    <label class="lbl">외곽선 굵기 <span data-show="strokeWidth" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="strokeWidth" min="0" max="30" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">투명도 <span data-show="opacity" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="opacity" min="10" max="100" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">수평 위치 <span data-show="posX" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="posX" min="0" max="100" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">수직 위치 <span data-show="posY" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="posY" min="0" max="100" class="w-full accent-blue-500">
+                </div>
+                <div>
+                    <label class="lbl">회전 <span data-show="rotation" data-unit="°" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="rotation" min="-180" max="180" class="w-full accent-blue-500">
+                </div>
+                <div class="flex items-end gap-3 text-[11px] text-slate-300 pb-1">
+                    <label class="flex items-center gap-1.5"><input type="checkbox" data-k="shadow" class="accent-blue-500">그림자</label>
+                    <label class="flex items-center gap-1.5"><input type="checkbox" data-k="boxOn" class="accent-blue-500">글상자</label>
+                </div>
+            </div>
+            <div data-bg-box class="grid grid-cols-2 gap-3 hidden">
+                <div>
+                    <label class="lbl">글상자 색</label>
+                    <div class="flex gap-2 items-center"><input type="color" data-k="boxColor" class="w-8 h-8 bg-transparent border-0"><input data-hex-for="boxColor" class="inp font-mono"></div>
+                </div>
+                <div>
+                    <label class="lbl">글상자 투명도 <span data-show="boxAlpha" data-unit="%" class="text-blue-400 font-mono"></span></label>
+                    <input type="range" data-k="boxAlpha" min="0" max="100" class="w-full accent-blue-500">
+                </div>
+            </div>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-3">
+            <div class="sec">4. 내려받기</div>
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="lbl">형식</label>
+                    <select id="exp-fmt" class="inp"><option value="png">PNG (무손실)</option><option value="jpeg">JPEG</option></select>
+                </div>
+                <div>
+                    <label class="lbl">크기 (가로)</label>
+                    <select id="exp-scale" class="inp"><option value="0.667">720px</option><option value="1" selected>1080px</option><option value="1.333">1440px</option><option value="2">2160px</option></select>
+                </div>
+                <div>
+                    <label class="lbl">JPEG 품질 <span id="exp-q-val" class="text-blue-400 font-mono">92</span></label>
+                    <input type="range" id="exp-q" min="50" max="100" value="92" class="w-full accent-blue-500">
+                </div>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <button class="btn btn-primary py-3" data-action="download"><i class="fa-solid fa-download"></i>내려받기</button>
+                <button class="btn py-3" data-action="copy"><i class="fa-regular fa-copy"></i>클립보드에 복사</button>
+            </div>
+            <p class="text-[11px] text-slate-500">내려받은 파일은 형식·크기를 다시 읽어 확인합니다. 파일에는 위치·카메라 등 메타데이터가 들어가지 않습니다.</p>
+        </div>
+    </div>
+
+    <!-- ===== TEMPLATES ===== -->
+    <div id="panel-templates" data-panel class="card hidden">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-floppy-disk text-blue-400 mr-1"></i>템플릿 보관함 <span id="tpl-count" class="text-slate-400 font-normal"></span></h3>
+            <span class="text-[10px] text-slate-400 bg-slate-800 px-2 py-1 rounded-full">이 브라우저에 자동 저장</span>
+        </div>
+        <div class="flex gap-2">
+            <input id="new-template-name" maxlength="40" class="inp" placeholder="템플릿 이름">
+            <button class="btn btn-ok whitespace-nowrap" data-action="tplSave"><i class="fa-solid fa-plus"></i>현재 디자인 저장</button>
+        </div>
+        <input id="tpl-filter" class="inp" placeholder="템플릿 검색">
+        <div id="template-list" class="space-y-2 max-h-72 overflow-y-auto pr-1"></div>
+
+        <div class="pt-4 border-t border-slate-800 space-y-3">
+            <div class="sec">JSON 백업 / 옮겨 쓰기</div>
+            <div class="grid grid-cols-2 gap-2">
+                <button class="btn" data-action="jsonExportCur"><i class="fa-solid fa-file-export text-emerald-400"></i>현재 디자인 내보내기</button>
+                <button class="btn" data-action="jsonExportAll"><i class="fa-solid fa-boxes-packing text-emerald-400"></i>전체 백업</button>
+            </div>
+            <button class="btn w-full" data-action="jsonImport"><i class="fa-solid fa-file-import text-blue-400"></i>JSON 가져오기 (전체 검증 후 저장)</button>
+            <input type="file" id="json-file-input" accept=".json,application/json" class="hidden">
+            <div class="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-[11px] space-y-2">
+                <span class="text-slate-400 font-semibold block">잘못된 JSON 시험 (거부되고 기존 목록이 유지되어야 함)</span>
+                <div class="grid grid-cols-3 gap-2">
+                    <button class="btn !text-rose-300" data-action="jsonBad">문법 손상</button>
+                    <button class="btn !text-amber-300" data-action="jsonMissing">필수 누락</button>
+                    <button class="btn !text-amber-300" data-action="jsonWrongType">값 형식 오류</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== CHECKS ===== -->
+    <div id="panel-checks" data-panel class="card hidden">
+        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-vial-circle-check text-blue-400 mr-1"></i>자동 검사</h3>
+        <p class="text-xs text-slate-400 leading-relaxed">
+            극단 입력 12건을 <b>수정 전(줄바꿈·영역 보정·바탕 채움이 없는 단순 렌더러)</b>과 <b>수정 후(현재 렌더러)</b>로 각각 그려 비교합니다.
+            이어서 세 화면비의 미리보기↔파일 대조, 잘못된 입력 뒤 작업 보존, 템플릿 CRUD, 잘못된 파일 거부를 검사합니다.
+        </p>
+        <button class="btn btn-primary w-full py-3" data-action="runChecks" id="run-checks-btn"><i class="fa-solid fa-play"></i>전체 검사 실행</button>
+        <div id="checks-out" class="space-y-4 text-xs"></div>
+    </div>
+
+    <!-- ===== SUBMIT ===== -->
+    <div id="panel-submit" data-panel class="card hidden">
+        <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-clipboard-check text-blue-400 mr-1"></i>제출 준비</h3>
+
+        <div id="checklist" class="space-y-1.5 text-xs"></div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-3">
+            <div class="sec">제출 주소</div>
+            <input id="submit-result-url" class="inp" placeholder="결과물 주소 (https://…, 로그인 없이 열려야 함)">
+            <input id="submit-source-url" class="inp" placeholder="소스 주소 (https://…)">
+            <p id="submit-url-msg" class="text-[11px] text-slate-500">주소는 계정 생성·로그인·인증 없이 새 시크릿 창에서 열리는지 직접 확인하세요.</p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-2">
+            <div class="sec">짧은 확인 방법 (4줄)</div>
+            <ol class="text-xs text-slate-300 space-y-1.5 list-decimal list-inside leading-relaxed">
+                <li><b>어디서 가나요</b> — 결과물 주소를 시크릿 창에서 열면 바로 편집기가 보입니다.</li>
+                <li><b>3단계 이내</b> — ① 사진 불러오기 ② 문구 입력 ③ 내려받기.</li>
+                <li><b>통과</b> — 미리보기와 같은 이미지·문구 배치의 PNG/JPEG가 저장됩니다.</li>
+                <li><b>안 될 때</b> — PNG/JPEG가 아니면 사유가 표시되고 작업은 유지됩니다. 검사 탭에서 자동 점검도 가능합니다.</li>
+            </ol>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-3">
+            <div class="sec">AI와 나의 판단 (직접 작성)</div>
+            <div>
+                <label class="lbl">① AI에게 맡긴 일</label>
+                <textarea id="j-delegated" rows="2" class="inp" placeholder="예: 코드 초안 작성, 화면 레이아웃 …"></textarea>
+            </div>
+            <div>
+                <label class="lbl">② 내가 직접 판단한 일</label>
+                <textarea id="j-decided" rows="2" class="inp" placeholder="예: 어떤 기능을 넣고 뺄지, 어떤 결과를 합격으로 볼지 …"></textarea>
+            </div>
+            <div>
+                <label class="lbl">③ AI 제안을 따르지 않은 일 (없으면 이유)</label>
+                <textarea id="j-rejected" rows="2" class="inp" placeholder="따르지 않은 제안과 이유. 없으면 '없음 — 이유: …'"></textarea>
+            </div>
+            <p id="j-msg" class="text-[11px] text-slate-500"></p>
+        </div>
+
+        <div class="pt-3 border-t border-slate-800 space-y-2">
+            <div class="sec">공개 안전 점검</div>
+            <button class="btn w-full" data-action="runSafety"><i class="fa-solid fa-shield-halved text-emerald-400"></i>위치정보·개인정보·비밀값 점검</button>
+            <div id="safety-out" class="text-xs space-y-1.5"></div>
+        </div>
+
+        <button class="btn btn-ok w-full py-3" data-action="exportReport"><i class="fa-solid fa-file-arrow-down"></i>제출 기록(JSON) 내려받기</button>
+    </div>
+</section>
+
+<!-- ============ RIGHT ============ -->
+<section class="order-1 lg:col-span-7 flex flex-col gap-6 min-w-0 lg:sticky lg:top-20 lg:h-[calc(100vh-6.5rem)] lg:overflow-y-auto lg:pr-2">
+
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4 md:p-6 flex flex-col items-center">
+        <div class="w-full flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b border-slate-800 text-xs">
+            <div class="flex items-center gap-2">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span class="font-bold text-slate-200">실시간 미리보기</span>
+                <span id="current-ratio-badge" class="px-2 py-0.5 rounded bg-slate-800 text-blue-400 border border-slate-700 font-mono"></span>
+            </div>
+            <div class="flex items-center gap-1.5">
+                <button class="btn !px-2.5 !py-1.5" data-action="undo" id="btn-undo" title="실행취소 (Ctrl+Z)"><i class="fa-solid fa-rotate-left"></i></button>
+                <button class="btn !px-2.5 !py-1.5" data-action="redo" id="btn-redo" title="다시실행 (Ctrl+Y)"><i class="fa-solid fa-rotate-right"></i></button>
+                <button class="btn !px-2.5 !py-1.5" data-action="guides" id="btn-guides" title="안전영역·중앙선 보기"><i class="fa-solid fa-border-none"></i></button>
+                <button class="btn !px-2.5 !py-1.5" data-action="reset" title="새로 시작"><i class="fa-solid fa-eraser"></i></button>
+            </div>
+        </div>
+
+        <div id="canvas-container" class="relative inline-block max-w-full" ondragover="event.preventDefault()">
+            <canvas id="meme-canvas" tabindex="0" class="rounded-lg border border-slate-800 cursor-grab bg-slate-950 outline-none focus:ring-2 focus:ring-blue-500/60"></canvas>
+            <div id="guide-layer" class="absolute inset-0 pointer-events-none hidden"></div>
+            <div id="sel-box" class="absolute hidden pointer-events-none" style="border:1.5px dashed #38bdf8">
+                <div id="rot-line" style="position:absolute;left:50%;top:-26px;height:26px;width:0;border-left:1.5px solid #38bdf8"></div>
+                <div id="rot-handle" title="드래그해서 회전 (Shift: 15° 단위)" class="pointer-events-auto" style="position:absolute;left:50%;top:-36px;width:20px;height:20px;margin-left:-10px;border-radius:9999px;background:#38bdf8;border:2px solid #0f172a;cursor:grab;touch-action:none;display:flex;align-items:center;justify-content:center;font-size:10px;color:#0f172a"><i class="fa-solid fa-rotate"></i></div>
+            </div>
+        </div>
+        <p class="text-[11px] text-slate-500 mt-4 text-center">문구를 클릭하면 선택되고, 위쪽 손잡이로 회전 · 문구를 끌면 이동합니다 (중앙에 자석처럼 붙음). 캔버스를 선택하고 방향키로 1% (Shift는 5%)씩 이동합니다.</p>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-5 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-800 pb-3 text-xs">
+            <span class="font-bold text-blue-400"><i class="fa-solid fa-images mr-1"></i>완성 이미지 3종</span>
+            <span class="text-slate-500">현재 작업을 슬롯에 덮어쓸 수 있습니다</span>
+        </div>
+        <div id="gallery" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
+    </div>
+</section>
+</main>
+
+<div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-md"></div>
+
+<div id="modal-overlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 space-y-4 text-slate-200">
+        <h3 id="modal-title" class="text-base font-bold text-white"></h3>
+        <div id="modal-body" class="text-xs text-slate-300 leading-relaxed"></div>
+        <div class="flex justify-end pt-2"><button class="btn" data-action="closeModal">확인</button></div>
+    </div>
+</div>
+
+<script>
+'use strict';
+/* ================= 상수 · 스키마 ================= */
+const DIM = { '1:1': [1080, 1080], '4:5': [1080, 1350], '9:16': [1080, 1920] };
+const FONTS = ['Noto Sans KR', 'Black Han Sans', 'Jua', 'Gowun Dodum', 'Nanum Pen Script', 'Impact'];
+const DEFAULTS = {
+    aspectRatio: '1:1', text: '', fontSize: 48, fontFamily: 'Noto Sans KR', bold: true,
+    textColor: '#ffffff', strokeColor: '#000000', strokeWidth: 12, textAlign: 'center',
+    posX: 50, posY: 80, rotation: 0, opacity: 100, lineHeight: 125,
+    shadow: false, boxOn: false, boxColor: '#000000', boxAlpha: 55,
+    bgMode: 'image', bgColor1: '#0f172a', bgColor2: '#4338ca', imgFit: 'cover', imgZoom: 100,
+    brightness: 100, blur: 0, dim: 0
+};
+const SPEC = {
+    aspectRatio: { t: 'enum', vals: Object.keys(DIM), req: true },
+    text: { t: 'str', max: 600, req: true },
+    fontSize: { t: 'num', min: 12, max: 200, req: true },
+    fontFamily: { t: 'enum', vals: FONTS },
+    textAlign: { t: 'enum', vals: ['left', 'center', 'right'] },
+    bgMode: { t: 'enum', vals: ['image', 'gradient', 'solid'] },
+    imgFit: { t: 'enum', vals: ['cover', 'contain'] },
+    textColor: { t: 'hex' }, strokeColor: { t: 'hex' }, boxColor: { t: 'hex' }, bgColor1: { t: 'hex' }, bgColor2: { t: 'hex' },
+    strokeWidth: { t: 'num', min: 0, max: 40 }, posX: { t: 'num', min: 0, max: 100 }, posY: { t: 'num', min: 0, max: 100 },
+    rotation: { t: 'num', min: -180, max: 180 }, opacity: { t: 'num', min: 0, max: 100 }, lineHeight: { t: 'num', min: 80, max: 250 },
+    boxAlpha: { t: 'num', min: 0, max: 100 }, imgZoom: { t: 'num', min: 100, max: 300 },
+    brightness: { t: 'num', min: 20, max: 200 }, blur: { t: 'num', min: 0, max: 20 }, dim: { t: 'num', min: 0, max: 90 },
+    shadow: { t: 'bool' }, boxOn: { t: 'bool' }, bold: { t: 'bool' }
+};
+const PRESETS = [
+    { label: '클래식 밈', set: { fontFamily: 'Impact', textColor: '#ffffff', strokeColor: '#000000', strokeWidth: 14, shadow: false, boxOn: false, fontSize: 72, posY: 85 } },
+    { label: '카드뉴스 제목', set: { fontFamily: 'Black Han Sans', textColor: '#ffffff', strokeColor: '#000000', strokeWidth: 0, shadow: true, boxOn: false, fontSize: 76, posY: 40, dim: 35 } },
+    { label: '자막 박스', set: { fontFamily: 'Noto Sans KR', textColor: '#ffffff', strokeColor: '#000000', strokeWidth: 0, boxOn: true, boxColor: '#000000', boxAlpha: 65, shadow: false, fontSize: 44, posY: 88 } },
+    { label: '손글씨 감성', set: { fontFamily: 'Nanum Pen Script', textColor: '#fef08a', strokeColor: '#1e293b', strokeWidth: 8, shadow: true, boxOn: false, fontSize: 84, posY: 50 } }
+];
+const LS = { tpl: 'meme_studio_templates', draft: 'meme_studio_draft', prov: 'meme_studio_prov', gal: 'meme_studio_gallery', judg: 'meme_studio_judgment', url: 'meme_studio_urls' };
+
+/* ================= 유틸 ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const uid = () => 'tpl-' + (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+const lsGet = (k, fb) => { try { const v = localStorage.getItem(k); return v == null ? fb : JSON.parse(v); } catch { return fb; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch { return false; } };
+const debounce = (fn, ms) => { let t; const d = (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), ms); }; d.flush = (...a) => { clearTimeout(t); fn(...a); }; return d; };
+const stamp = () => new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14);
+
+/* ================= 상태 ================= */
+const S = { ...DEFAULTS, text: '개발자: 이 코드 왜 됨?\n(상관없음. 퇴근한다)' };
+const BG = { img: null, source: 'sample', name: '', meta: null };
+let PROV = lsGet(LS.prov, { type: 'own', url: '', basis: '라이선스명', basisText: '' });
+let templatesStore = [];
+const RESULTS = { edge: null, ratio: null, preserve: null, crud: null, files: null, safety: null };
+const OPS = { create: 0, read: 0, update: 0, delete: 0 };
+let canvas, LAST = null, selected = false;
+
+/* ================= 검증 ================= */
+function validateTemplate(raw) {
+    if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return { ok: false, errors: ['템플릿이 객체 형태가 아닙니다'] };
+    const errors = [], clean = { ...DEFAULTS };
+    for (const [k, sp] of Object.entries(SPEC)) {
+        const v = raw[k];
+        if (v === undefined) { if (sp.req) errors.push(`필수 항목 누락: ${k}`); continue; }
+        if (sp.t === 'str') { if (typeof v !== 'string') errors.push(`${k}: 문자열이어야 함`); else if (v.length > sp.max) errors.push(`${k}: ${sp.max}자 초과`); else clean[k] = v; }
+        else if (sp.t === 'num') { if (typeof v !== 'number' || !isFinite(v)) errors.push(`${k}: 숫자여야 함`); else if (v < sp.min || v > sp.max) errors.push(`${k}: ${sp.min}~${sp.max} 범위 밖`); else clean[k] = v; }
+        else if (sp.t === 'bool') { if (typeof v !== 'boolean') errors.push(`${k}: true/false여야 함`); else clean[k] = v; }
+        else if (sp.t === 'hex') { if (typeof v !== 'string' || !/^#[0-9a-f]{6}$/i.test(v)) errors.push(`${k}: #RRGGBB 형식이어야 함`); else clean[k] = v.toLowerCase(); }
+        else if (sp.t === 'enum') { if (!sp.vals.includes(v)) errors.push(`${k}: 허용되지 않은 값`); else clean[k] = v; }
+    }
+    return { ok: errors.length === 0, errors, clean };
+}
+const pickTemplateFields = o => { const r = {}; for (const k of Object.keys(DEFAULTS)) r[k] = o[k]; return r; };
+
+/* ================= 렌더러 (미리보기·내보내기·갤러리 공용) ================= */
+function wrapParagraph(g, p, maxW) {
+    const lines = []; let cur = '';
+    for (const word of p.split(' ')) {
+        const test = cur ? cur + ' ' + word : word;
+        if (g.measureText(test).width <= maxW) { cur = test; continue; }
+        if (cur) { lines.push(cur); cur = ''; }
+        if (g.measureText(word).width <= maxW) { cur = word; continue; }
+        for (const ch of Array.from(word)) {            // 이모지 등 서로게이트 쌍을 쪼개지 않음
+            const t = cur + ch;
+            if (cur && g.measureText(t).width > maxW) { lines.push(cur); cur = ch; } else cur = t;
+        }
+    }
+    lines.push(cur);
+    return lines;
+}
+
+function layoutText(g, st, W, H, legacy) {
+    const out = { drawn: false, lines: [], fontSize: st.fontSize, lineH: 0, w: 0, h: 0, cx: 0, cy: 0, bbox: null };
+    if (st.text.trim() === '') return out;
+    const fontStr = s => `${st.bold ? 'bold ' : ''}${s}px "${st.fontFamily}", sans-serif`;
+    let size = st.fontSize, lines;
+    const build = () => {
+        g.font = fontStr(size);
+        lines = [];
+        for (const p of st.text.split('\n')) {
+            if (legacy) lines.push(p); else lines.push(...(p === '' ? [''] : wrapParagraph(g, p, W * 0.88)));
+        }
+    };
+    build();
+    if (!legacy) {                                      // 영역 높이를 넘으면 글자 크기를 줄임
+        while (size > 14 && lines.length * size * st.lineHeight / 100 > H * 0.9) { size = Math.max(14, Math.floor(size * 0.92)); build(); }
+    }
+    const lineH = size * st.lineHeight / 100;
+    const w = Math.max(...lines.map(l => g.measureText(l).width));
+    const h = lines.length * lineH;
+    let cx = W * st.posX / 100, cy = H * st.posY / 100;
+    if (!legacy) {                                      // 문구 상자가 캔버스 밖으로 나가지 않게 보정
+        const pad = W * 0.02;
+        cx = clamp(cx, pad + w / 2, Math.max(pad + w / 2, W - pad - w / 2));
+        cy = clamp(cy, pad + h / 2, Math.max(pad + h / 2, H - pad - h / 2));
+    }
+    return { drawn: true, lines, fontSize: size, lineH, w, h, cx, cy, fontStr: fontStr(size), bbox: { l: cx - w / 2, r: cx + w / 2, t: cy - h / 2, b: cy + h / 2 } };
+}
+
+function drawBackground(g, W, H, st, bg, legacy) {
+    if (!legacy) { g.fillStyle = st.bgColor1; g.fillRect(0, 0, W, H); }   // 투명 PNG·여백이 비지 않도록 불투명 바탕
+    if (st.bgMode === 'solid') { g.fillStyle = st.bgColor1; g.fillRect(0, 0, W, H); }
+    else if (st.bgMode === 'gradient' || !bg || !bg.img) {
+        const gr = g.createLinearGradient(0, 0, W, H);
+        gr.addColorStop(0, st.bgColor1); gr.addColorStop(1, st.bgColor2);
+        g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    } else {
+        const img = bg.img, iw = img.width, ih = img.height;
+        const base = st.imgFit === 'contain' ? Math.min(W / iw, H / ih) : Math.max(W / iw, H / ih);
+        const s = base * st.imgZoom / 100, rw = iw * s, rh = ih * s;
+        g.save();
+        if (st.brightness !== 100 || st.blur) g.filter = `brightness(${st.brightness}%) blur(${st.blur}px)`;
+        g.drawImage(img, (W - rw) / 2, (H - rh) / 2, rw, rh);
+        g.restore();
+    }
+    if (st.dim > 0) { g.fillStyle = `rgba(0,0,0,${st.dim / 100})`; g.fillRect(0, 0, W, H); }
+}
+
+function renderCard(c, st, bg, opts = {}) {
+    const legacy = !!opts.legacy, scale = opts.scale || 1;
+    const [W, H] = DIM[st.aspectRatio];
+    c.width = Math.round(W * scale); c.height = Math.round(H * scale);
+    const g = c.getContext('2d');
+    g.setTransform(scale, 0, 0, scale, 0, 0);
+    g.clearRect(0, 0, W, H);
+    drawBackground(g, W, H, st, bg, legacy);
+    const L = layoutText(g, st, W, H, legacy);
+    if (L.drawn) {
+        g.save();
+        g.globalAlpha = st.opacity / 100;
+        g.translate(L.cx, L.cy);
+        g.rotate(st.rotation * Math.PI / 180);
+        g.font = L.fontStr; g.textBaseline = 'middle'; g.textAlign = st.textAlign; g.lineJoin = 'round';
+        const ax = st.textAlign === 'left' ? -L.w / 2 : st.textAlign === 'right' ? L.w / 2 : 0;
+        if (st.boxOn) {
+            const p = L.fontSize * 0.35;
+            const a = Math.round(st.boxAlpha * 2.55).toString(16).padStart(2, '0');
+            g.fillStyle = st.boxColor + a;
+            g.beginPath(); g.roundRect(-L.w / 2 - p, -L.h / 2 - p * 0.6, L.w + 2 * p, L.h + 1.2 * p, p * 0.6); g.fill();
+        }
+        let y = -L.h / 2 + L.lineH / 2;
+        for (const line of L.lines) {
+            if (line.trim()) {
+                if (st.shadow) { g.shadowColor = 'rgba(0,0,0,.65)'; g.shadowBlur = L.fontSize * 0.18; g.shadowOffsetY = L.fontSize * 0.06; }
+                if (st.strokeWidth > 0) { g.strokeStyle = st.strokeColor; g.lineWidth = L.fontSize * st.strokeWidth / 100; g.strokeText(line, ax, y); }
+                g.fillStyle = st.textColor; g.fillText(line, ax, y);
+                g.shadowColor = 'transparent';
+            }
+            y += L.lineH;
+        }
+        g.restore();
+    }
+    return { ...L, W, H };
+}
+
+/* ================= 화면 갱신 · 이력 ================= */
+function render() {
+    if (!canvas) return;
+    LAST = renderCard(canvas, S, BG);
+    updateSelection();
+    const [W, H] = DIM[S.aspectRatio];
+    $('#current-ratio-badge').textContent = `${S.aspectRatio} (${W}×${H})`;
+    $('#bg-info').textContent = BG.source === 'upload' ? `사용 중: ${BG.name} (${BG.img.width}×${BG.img.height})` : '사용 중: 샘플 배경';
+    checkTextWarn();
+}
+
+function syncUI() {
+    $$('[data-k]').forEach(el => {
+        const v = S[el.dataset.k];
+        if (el.type === 'checkbox') el.checked = !!v;
+        else if (document.activeElement !== el) el.value = v;
+    });
+    $$('[data-hex-for]').forEach(el => { if (document.activeElement !== el) el.value = S[el.dataset.hexFor]; });
+    $$('[data-show]').forEach(el => { el.textContent = S[el.dataset.show] + (el.dataset.unit || ''); });
+    $$('[data-set]').forEach(el => { const [k, v] = el.dataset.set.split(/:(.*)/s); el.classList.toggle('seg-on', String(S[k]) === v); });
+    $$('[data-k-toggle]').forEach(el => el.classList.toggle('seg-on', !!S[el.dataset.kToggle]));
+    $$('[data-bg]').forEach(el => el.classList.toggle('hidden', !el.dataset.bg.split(' ').includes(S.bgMode)));
+    $('[data-bg-box]').classList.toggle('hidden', !S.boxOn);
+    updateGuides();
+}
+
+const Hist = { stack: [], idx: -1 };
+function pushHistory() {
+    const s = JSON.stringify(S);
+    if (Hist.stack[Hist.idx] === s) return;
+    Hist.stack = Hist.stack.slice(0, Hist.idx + 1); Hist.stack.push(s);
+    if (Hist.stack.length > 100) Hist.stack.shift();
+    Hist.idx = Hist.stack.length - 1;
+    updateUndoButtons();
+}
+const commit = debounce(() => { pushHistory(); lsSet(LS.draft, S); }, 350);
+function updateUndoButtons() { $('#btn-undo').disabled = Hist.idx <= 0; $('#btn-redo').disabled = Hist.idx >= Hist.stack.length - 1; }
+function travel(d) {
+    commit.flush();
+    const i = Hist.idx + d; if (i < 0 || i >= Hist.stack.length) return;
+    Hist.idx = i; Object.assign(S, JSON.parse(Hist.stack[i]));
+    syncUI(); render(); updateUndoButtons(); lsSet(LS.draft, S);
+}
+function onChange() { syncUI(); render(); commit(); }
+
+function applyState(clean) { Object.assign(S, clean); syncUI(); render(); commit.flush(); }
+
+/* 개인정보·비밀값 패턴 */
+const PII = [
+    ['이메일', /[\w.+-]+@[\w-]+\.[\w.-]+/g], ['휴대전화', /01[016789][-\s]?\d{3,4}[-\s]?\d{4}/g],
+    ['주민등록번호', /\d{6}[-\s]?[1-4]\d{6}/g], ['카드번호', /\b(?:\d[ -]?){13,16}\b/g]
+];
+const SECRET = [
+    ['API 키(sk-)', /sk-[A-Za-z0-9_-]{16,}/g], ['AWS 키', /AKIA[0-9A-Z]{16}/g], ['GitHub 토큰', /gh[pousr]_[A-Za-z0-9]{30,}/g],
+    ['JWT', /eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]+/g], ['개인키', /-----BEGIN [A-Z ]*PRIVATE KEY-----/g],
+    ['비밀번호/토큰 대입', /(password|passwd|secret|token|api[_-]?key)\s*[:=]\s*\S{6,}/gi], ['비밀번호(한글)', /(비밀번호|패스워드)\s*[:：=]\s*\S+/g]
+];
+function scanText(txt) {
+    const hits = [];
+    for (const [type, re] of [...PII.map(p => ['개인정보·' + p[0], p[1]]), ...SECRET.map(p => ['비밀값·' + p[0], p[1]])]) {
+        const m = txt.match(re); if (m) hits.push({ type, count: m.length });
+    }
+    return hits;
+}
+function checkTextWarn() {
+    const hits = scanText(S.text), el = $('#text-warn');
+    el.classList.toggle('hidden', !hits.length);
+    if (hits.length) el.textContent = '⚠ 문구에 ' + hits.map(h => h.type).join(', ') + '로 보이는 내용이 있습니다. 공개 전에 확인하세요.';
+}
+
+/* ================= 이미지 입력 ================= */
+function scanMetadata(u8) {
+    const found = [], dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength), ascii = (a, b) => String.fromCharCode(...u8.subarray(a, b));
+    if (u8[0] === 0xFF && u8[1] === 0xD8) {
+        let i = 2;
+        while (i + 4 < u8.length && u8[i] === 0xFF) {
+            const m = u8[i + 1];
+            if (m === 0xDA || m === 0xD9) break;
+            if (m >= 0xD0 && m <= 0xD7) { i += 2; continue; }
+            const len = dv.getUint16(i + 2);
+            if (m === 0xE1) { const sig = ascii(i + 4, i + 4 + 30); if (sig.startsWith('Exif')) found.push('EXIF'); else if (sig.includes('ns.adobe.com/xap')) found.push('XMP'); }
+            else if (m === 0xED) found.push('IPTC');
+            else if (m === 0xFE) found.push('주석');
+            i += 2 + len;
+        }
+    } else if (u8[0] === 0x89 && ascii(1, 4) === 'PNG') {
+        let i = 8;
+        while (i + 8 <= u8.length) {
+            const len = dv.getUint32(i), type = ascii(i + 4, i + 8);
+            if (['eXIf', 'tEXt', 'iTXt', 'zTXt'].includes(type)) found.push(type);
+            if (type === 'IEND') break;
+            i += 12 + len;
+        }
+    }
+    return found;
+}
+const sniff = u8 => (u8[0] === 0x89 && u8[1] === 0x50 && u8[2] === 0x4E && u8[3] === 0x47) ? 'png' : (u8[0] === 0xFF && u8[1] === 0xD8 && u8[2] === 0xFF) ? 'jpeg' : null;
+
+/** 파일을 검사하고 메타데이터 없는 새 캔버스로 변환. 상태는 건드리지 않음. */
+async function loadCleanImage(file) {
+    if (!file || file.size === 0) return { ok: false, reason: '빈 파일입니다.' };
+    if (file.size > 25 * 1024 * 1024) return { ok: false, reason: `파일이 너무 큽니다 (${(file.size / 1048576).toFixed(1)}MB, 최대 25MB).` };
+    const u8 = new Uint8Array(await file.arrayBuffer());
+    const kind = sniff(u8);
+    if (!kind) {
+        const guess = /^GIF8/.test(String.fromCharCode(...u8.subarray(0, 4))) ? 'GIF' : /^RIFF/.test(String.fromCharCode(...u8.subarray(0, 4))) ? 'WEBP 등' : '알 수 없는 형식';
+        return { ok: false, reason: `PNG·JPEG가 아닙니다 (감지: ${guess}). 파일 내용의 시그니처로 판별했으며 확장자·이름은 신뢰하지 않습니다.` };
+    }
+    let bmp;
+    try { bmp = await createImageBitmap(new Blob([u8], { type: 'image/' + kind })); }
+    catch { return { ok: false, reason: `${kind.toUpperCase()} 파일이 손상되어 열 수 없습니다.` }; }
+    const k = Math.min(1, 2400 / Math.max(bmp.width, bmp.height));
+    const c = document.createElement('canvas'); c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    c.getContext('2d').drawImage(bmp, 0, 0, c.width, c.height);
+    bmp.close && bmp.close();
+    return { ok: true, canvas: c, kind, removed: scanMetadata(u8) };
+}
+
+async function handleImageFile(file) {
+    const r = await loadCleanImage(file);
+    if (!r.ok) {
+        showToast(`[불러오기 거부] ${r.reason} 기존 작업은 그대로입니다.`, 'error');
+        showModal('이미지를 불러올 수 없습니다', `<p><b>${esc(file ? file.name : '')}</b></p><p class="mt-2">${esc(r.reason)}</p><p class="mt-2">PNG 또는 JPEG 파일을 선택해 주세요. <b>작업 중인 내용은 그대로 유지됩니다.</b></p>`);
+        return;
+    }
+    BG.img = r.canvas; BG.source = 'upload'; BG.name = file.name; BG.meta = { kind: r.kind, removed: r.removed };
+    S.bgMode = 'image';
+    onChange();
+    showToast(`${r.kind.toUpperCase()} 불러옴 — 메타데이터 ${r.removed.length ? r.removed.join('·') + ' 제거' : '없음'}, 결과물 0건`, 'success');
+}
+
+function makeSampleBg() {
+    const c = document.createElement('canvas'); c.width = c.height = 1080;
+    const g = c.getContext('2d'), gr = g.createLinearGradient(0, 0, 1080, 1080);
+    gr.addColorStop(0, '#0f172a'); gr.addColorStop(.5, '#1e1b4b'); gr.addColorStop(1, '#311b92');
+    g.fillStyle = gr; g.fillRect(0, 0, 1080, 1080);
+    g.fillStyle = 'rgba(99,102,241,.2)'; g.beginPath(); g.arc(200, 200, 300, 0, 7); g.fill();
+    g.fillStyle = 'rgba(236,72,153,.15)'; g.beginPath(); g.arc(880, 880, 400, 0, 7); g.fill();
+    return c;
+}
+
+/* ================= 내려받기 ================= */
+function exportBlob(st, bg, fmt, scale, quality) {
+    const c = document.createElement('canvas'); renderCard(c, st, bg, { scale });
+    return new Promise(res => c.toBlob(res, fmt === 'png' ? 'image/png' : 'image/jpeg', quality));
+}
+async function verifyBlob(blob, fmt, W, H) {
+    const u8 = new Uint8Array(await blob.arrayBuffer());
+    if (sniff(u8) !== fmt) return `파일 형식이 ${fmt.toUpperCase()}가 아닙니다`;
+    const bmp = await createImageBitmap(blob);
+    const ok = bmp.width === W && bmp.height === H; bmp.close && bmp.close();
+    return ok ? null : `크기 불일치 (${bmp.width}×${bmp.height})`;
+}
+async function doDownload() {
+    const fmt = $('#exp-fmt').value, scale = +$('#exp-scale').value, q = +$('#exp-q').value / 100;
+    commit.flush();
+    const blob = await exportBlob(S, BG, fmt, scale, q);
+    if (!blob) return showToast('이미지 생성에 실패했습니다.', 'error');
+    const [W, H] = DIM[S.aspectRatio];
+    const bad = await verifyBlob(blob, fmt, Math.round(W * scale), Math.round(H * scale));
+    if (bad) return showToast('[저장 중단] ' + bad, 'error');
+    const url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = `meme-card_${S.aspectRatio.replace(':', 'x')}_${stamp()}.${fmt === 'png' ? 'png' : 'jpg'}`;
+    document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+    showToast(`${fmt.toUpperCase()} 저장 (${Math.round(W * scale)}×${Math.round(H * scale)}, ${(blob.size / 1024).toFixed(0)}KB, 형식·크기 확인 완료)`, 'success');
+}
+async function doCopy() {
+    try {
+        const blob = await exportBlob(S, BG, 'png', 1);
+        await navigator.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+        showToast('이미지를 클립보드에 복사했습니다.', 'success');
+    } catch { showToast('클립보드 복사가 허용되지 않는 환경입니다. 내려받기를 이용하세요.', 'warning'); }
+}
+
+/* ================= 템플릿 ================= */
+function storageOk() { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; } catch { return false; } }
+function loadTemplates() {
+    const raw = lsGet(LS.tpl, null);
+    let list = [];
+    if (Array.isArray(raw)) for (const t of raw) {
+        const v = validateTemplate(t);
+        if (v.ok && typeof t.id === 'string' && typeof t.name === 'string') list.push({ id: t.id, name: t.name.slice(0, 40), ...pickTemplateFields(v.clean) });
+    }
+    if (!list.length) {
+        const mk = (name, o) => ({ id: uid(), name, ...pickTemplateFields({ ...DEFAULTS, ...o }) });
+        list = [
+            mk('기본 밈 (1:1)', { text: '개발자: 이 코드 왜 됨?\n(상관없음. 퇴근한다)' }),
+            mk('감성 카드뉴스 (4:5)', { aspectRatio: '4:5', text: '오늘 할 일을 내일로 미루면\n내일의 내가 알아서 한다 ✨', fontSize: 52, fontFamily: 'Gowun Dodum', textColor: '#fef08a', strokeColor: '#1e293b', posY: 50 }),
+            mk('스토리 공지 (9:16)', { aspectRatio: '9:16', text: '🔥 금주 일정 업데이트 🔥\n자세한 내용은 프로필 링크!', fontSize: 56, fontFamily: 'Impact', strokeColor: '#dc2626', posY: 25 })
+        ];
+        lsSet(LS.tpl, list);
+    }
+    templatesStore = list;
+}
+const saveTemplates = () => lsSet(LS.tpl, templatesStore);
+const curTemplateFields = () => pickTemplateFields(S);
+
+function renderTemplates() {
+    const q = $('#tpl-filter').value.trim().toLowerCase();
+    $('#tpl-count').textContent = `(${templatesStore.length}개)`;
+    const box = $('#template-list'); box.innerHTML = '';
+    const shown = templatesStore.filter(t => !q || t.name.toLowerCase().includes(q) || t.text.toLowerCase().includes(q));
+    if (!shown.length) box.innerHTML = '<p class="text-xs text-slate-500 py-3 text-center">템플릿이 없습니다.</p>';
+    for (const t of shown) {
+        const d = document.createElement('div');
+        d.className = 'bg-slate-950 p-3 rounded-xl border border-slate-800 flex items-center justify-between gap-2';
+        d.dataset.id = t.id;
+        d.innerHTML = `
+            <button class="flex-1 min-w-0 text-left" data-action="tplLoad" data-id="${esc(t.id)}">
+                <div class="flex items-center gap-2"><span class="text-xs font-bold text-slate-200 truncate">${esc(t.name)}</span>
+                <span class="text-[10px] bg-slate-800 text-blue-400 px-1.5 py-0.5 rounded font-mono">${esc(t.aspectRatio)}</span>
+                <span class="w-3 h-3 rounded-full border border-slate-600" style="background:${esc(t.textColor)}"></span></div>
+                <p class="text-[11px] text-slate-500 truncate mt-0.5">${esc(t.text.replace(/\n/g, ' '))}</p>
+            </button>
+            <div class="flex items-center">
+                <button class="p-1.5 text-slate-400 hover:text-amber-400 text-xs" data-action="tplUpdate" data-id="${esc(t.id)}" title="현재 디자인으로 덮어쓰기"><i class="fa-solid fa-floppy-disk"></i></button>
+                <button class="p-1.5 text-slate-400 hover:text-sky-400 text-xs" data-action="tplRename" data-id="${esc(t.id)}" title="이름 변경"><i class="fa-solid fa-pen"></i></button>
+                <button class="p-1.5 text-slate-400 hover:text-emerald-400 text-xs" data-action="tplDup" data-id="${esc(t.id)}" title="복제"><i class="fa-regular fa-clone"></i></button>
+                <button class="p-1.5 text-slate-400 hover:text-rose-400 text-xs" data-action="tplDelete" data-id="${esc(t.id)}" title="삭제"><i class="fa-solid fa-trash"></i></button>
+            </div>`;
+        box.appendChild(d);
+    }
+}
+const findTpl = id => templatesStore.find(t => t.id === id);
+const TPL = {
+    create(name) {
+        if (templatesStore.length >= 100) { showToast('템플릿은 최대 100개까지 저장됩니다.', 'warning'); return null; }
+        const t = { id: uid(), name: (name || '').trim().slice(0, 40) || `새 템플릿 ${new Date().toLocaleTimeString('ko-KR')}`, ...curTemplateFields() };
+        templatesStore.unshift(t); OPS.create++; saveTemplates(); renderTemplates(); return t;
+    },
+    load(id) { const t = findTpl(id); if (!t) return null; OPS.read++; applyState(validateTemplate(t).clean); return t; },
+    update(id) { const t = findTpl(id); if (!t) return null; Object.assign(t, curTemplateFields()); OPS.update++; saveTemplates(); renderTemplates(); return t; },
+    remove(id) {
+        const i = templatesStore.findIndex(t => t.id === id); if (i < 0) return null;
+        const [t] = templatesStore.splice(i, 1); OPS.delete++; saveTemplates(); renderTemplates(); return { t, i };
+    }
+};
+
+/* JSON 가져오기: 전체 검증 → 하나라도 오류면 아무것도 바꾸지 않음 */
+function processJSONImport(rawContent, quiet) {
+    const before = templatesStore.length;
+    const reject = (title, bodyHtml, short) => {
+        if (!quiet) { showModal(title, bodyHtml + `<p class="mt-3"><b>저장이 거부되었고 기존 템플릿과 작업은 그대로입니다.</b> (가져오기 전 ${before}건 → 후 ${templatesStore.length}건)</p>`); showToast('[거부] ' + short, 'error'); }
+        return { ok: false, reason: short, before, after: templatesStore.length };
+    };
+    if (typeof rawContent !== 'string' || rawContent.length > 1024 * 1024) return reject('JSON을 불러올 수 없습니다', '<p>파일이 1MB를 넘습니다.</p>', '파일이 너무 큽니다');
+    let parsed;
+    try { parsed = JSON.parse(rawContent); }
+    catch (e) { return reject('JSON 문법 오류', `<p>올바른 JSON 형식이 아닙니다.</p><p class="mt-2 font-mono text-rose-400 text-[11px]">${esc(e.message)}</p>`, 'JSON 문법이 손상되었습니다'); }
+    const items = Array.isArray(parsed.templates) ? parsed.templates : [parsed.template || parsed];
+    if (!items.length || items.length > 100) return reject('JSON 내용 오류', '<p>가져올 템플릿이 없거나 100개를 넘습니다.</p>', '템플릿 개수 오류');
+    const errs = [], cleaned = [];
+    items.forEach((it, i) => {
+        const v = validateTemplate(it);
+        if (!v.ok) errs.push(`#${i + 1}: ${v.errors.join(', ')}`);
+        else cleaned.push({ name: typeof it.name === 'string' && it.name.trim() ? it.name.trim().slice(0, 40) : '가져온 템플릿', clean: v.clean });
+    });
+    if (errs.length) return reject('JSON 검증 실패', `<ul class="list-disc list-inside space-y-1 font-mono text-[11px] text-amber-300">${errs.slice(0, 6).map(e => `<li>${esc(e)}</li>`).join('')}</ul>`, errs[0].slice(0, 60));
+    const added = cleaned.map(c => ({ id: uid(), name: c.name, ...pickTemplateFields(c.clean) }));
+    templatesStore.unshift(...added); OPS.create += added.length; saveTemplates(); renderTemplates();
+    applyState(cleaned[0].clean);
+    if (!quiet) showToast(`JSON ${added.length}건을 가져왔습니다. (가져오기 전 ${before}건 → 후 ${templatesStore.length}건)`, 'success');
+    return { ok: true, before, after: templatesStore.length, added: added.length };
+}
+function downloadText(name, text, mime = 'application/json') {
+    const url = URL.createObjectURL(new Blob([text], { type: mime })), a = document.createElement('a');
+    a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 2000);
+}
+
+/* ================= 이미지 출처 · 갤러리 ================= */
+function validateProv(p) {
+    if (p.type === 'own') return { ok: true };
+    let u; try { u = new URL(p.url); } catch { return { ok: false, msg: '원본 출처 URL이 올바르지 않습니다.' }; }
+    if (!/^https?:$/.test(u.protocol)) return { ok: false, msg: '출처 URL은 http(s)여야 합니다.' };
+    if (!p.basisText.trim()) return { ok: false, msg: `허가 근거(${p.basis}) 내용을 적어 주세요.` };
+    return { ok: true };
+}
+const provText = p => p.type === 'own' ? '본인 제작' : `원본: ${p.url} · 근거(${p.basis}): ${p.basisText}`;
+function syncProvUI() {
+    $('#prov-type').value = PROV.type; $('#prov-url').value = PROV.url; $('#prov-basis').value = PROV.basis; $('#prov-basis-text').value = PROV.basisText;
+    $('#prov-ext').classList.toggle('hidden', PROV.type === 'own');
+    const v = validateProv(PROV);
+    $('#prov-badge').innerHTML = v.ok ? '<span class="pill-pass">기록됨</span>' : '<span class="pill-fail">보완 필요</span>';
+    $('#prov-msg').textContent = v.ok ? '갤러리에 저장할 때 이 기록이 함께 저장됩니다.' : v.msg;
+}
+
+const GAL = [null, null, null];     // { blob, url, W, H }
+function defaultSlot(i) {
+    const base = [
+        { title: '개발자의 하루', st: { aspectRatio: '1:1', text: '개발자의 하루:\n버그가 안 잡힌다...', bgMode: 'gradient', bgColor1: '#1e1b4b', bgColor2: '#4338ca', fontSize: 72, posY: 50, strokeColor: '#1e293b' } },
+        { title: '오늘의 개발 팁', st: { aspectRatio: '4:5', text: '오늘의 개발 팁 💡\n테스트 코드를 먼저 짜자', bgMode: 'gradient', bgColor1: '#0f172a', bgColor2: '#0e7490', fontFamily: 'Gowun Dodum', textColor: '#fef08a', strokeColor: '#0f172a', fontSize: 66, posY: 50 } },
+        { title: '금요일 퇴근 10분 전', st: { aspectRatio: '9:16', text: '🔥 금요일 퇴근 10분 전 🔥\n건드리지 마세요', bgMode: 'gradient', bgColor1: '#7f1d1d', bgColor2: '#111827', fontFamily: 'Black Han Sans', strokeColor: '#b91c1c', fontSize: 80, posY: 45 } }
+    ][i];
+    return { title: base.title, st: pickTemplateFields({ ...DEFAULTS, ...base.st }), bg: null, prov: { type: 'own', url: '', basis: '라이선스명', basisText: '' }, saved: false };
+}
+let galleryData = [];
+function loadGalleryData() {
+    const raw = lsGet(LS.gal, []);
+    galleryData = [0, 1, 2].map(i => {
+        const r = raw && raw[i];
+        if (r && validateTemplate(r.st).ok && validateProv(r.prov || {}).ok) return { title: String(r.title || '').slice(0, 40), st: pickTemplateFields(validateTemplate(r.st).clean), bg: typeof r.bg === 'string' && r.bg.startsWith('data:image/jpeg') ? r.bg : null, prov: r.prov, saved: true };
+        return defaultSlot(i);
+    });
+}
+const loadImg = src => new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+
+async function renderGallery() {
+    const box = $('#gallery'); box.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+        const d = galleryData[i];
+        let bg = null;
+        if (d.st.bgMode === 'image') bg = { img: d.bg ? await loadImg(d.bg).catch(() => makeSampleBg()) : makeSampleBg() };
+        const blob = await exportBlob(d.st, bg, 'png', 1);
+        if (GAL[i]) URL.revokeObjectURL(GAL[i].url);
+        const [W, H] = DIM[d.st.aspectRatio];
+        GAL[i] = { blob, url: URL.createObjectURL(blob), W, H };
+        const el = document.createElement('div');
+        el.className = 'bg-slate-950 p-2.5 rounded-xl border border-slate-800 space-y-2';
+        el.innerHTML = `
+            <a href="${GAL[i].url}" target="_blank" rel="noopener" class="block rounded-lg overflow-hidden border border-slate-800 bg-slate-900" title="새 탭에서 원본 크기로 열기">
+                <img src="${GAL[i].url}" alt="${esc(d.title)}" class="w-full block" style="aspect-ratio:${W}/${H};object-fit:cover">
+            </a>
+            <div class="text-[11px] space-y-1">
+                <p class="font-bold text-slate-200 truncate">${esc(d.title)} <span class="text-slate-500 font-mono font-normal">${d.st.aspectRatio}</span></p>
+                <p class="text-slate-400 text-[10px] break-all">출처: ${esc(provText(d.prov))}</p>
+                <span class="pill-pass">메타데이터 0건</span>
+            </div>
+            <div class="grid grid-cols-3 gap-1">
+                <a class="btn !px-1 !py-1 text-[10px]" href="${GAL[i].url}" target="_blank" rel="noopener">열기</a>
+                <a class="btn !px-1 !py-1 text-[10px]" href="${GAL[i].url}" download="gallery-${i + 1}_${d.st.aspectRatio.replace(':', 'x')}.png">저장</a>
+                <button class="btn !px-1 !py-1 text-[10px]" data-action="galSave" data-i="${i}" title="현재 작업으로 덮어쓰기">덮어쓰기</button>
+            </div>`;
+        box.appendChild(el);
+    }
+}
+async function saveToGallery(i) {
+    const v = validateProv(PROV);
+    if (!v.ok) { showToast('[저장 거부] ' + v.msg, 'error'); $('#panel-editor details').open = true; return; }
+    let bg = null;
+    if (S.bgMode === 'image' && BG.source === 'upload') {
+        const c = document.createElement('canvas'), k = Math.min(1, 900 / Math.max(BG.img.width, BG.img.height));
+        c.width = Math.round(BG.img.width * k); c.height = Math.round(BG.img.height * k);
+        const g = c.getContext('2d'); g.fillStyle = '#000'; g.fillRect(0, 0, c.width, c.height); g.drawImage(BG.img, 0, 0, c.width, c.height);
+        bg = c.toDataURL('image/jpeg', .8);
+    }
+    const title = (S.text.split('\n')[0] || '제목 없음').slice(0, 24);
+    const prev = galleryData[i];
+    galleryData[i] = { title, st: pickTemplateFields(S), bg, prov: { ...PROV }, saved: true };
+    if (!lsSet(LS.gal, galleryData)) { galleryData[i] = prev; showToast('저장 공간이 부족합니다. 더 작은 이미지를 쓰세요.', 'error'); return; }
+    await renderGallery();
+    showToast(`슬롯 ${i + 1}에 저장했습니다. (${provText(PROV).slice(0, 40)})`, 'success');
+}
+
+/* ================= 검사 ================= */
+const mkImg = (w, h, kind) => {
+    const c = document.createElement('canvas'); c.width = w; c.height = h; const g = c.getContext('2d');
+    if (kind === 'transparent') { g.fillStyle = 'rgba(255,60,60,.6)'; g.beginPath(); g.arc(w / 2, h / 2, Math.min(w, h) / 4, 0, 7); g.fill(); }
+    else { const gr = g.createLinearGradient(0, 0, w, h); gr.addColorStop(0, '#0ea5e9'); gr.addColorStop(1, '#a855f7'); g.fillStyle = gr; g.fillRect(0, 0, w, h); }
+    return c;
+};
+const EDGE_CASES = [
+    { id: 'E01', name: '긴 한글 문장 (공백 포함 약 150자)', st: { text: '가나다라마바사아자차카타파하 '.repeat(11).trim(), fontSize: 64 } },
+    { id: 'E02', name: '공백 없는 긴 영문 90자', st: { text: 'A'.repeat(90), fontSize: 80 } },
+    { id: 'E03', name: '한글·영문 혼합 긴 문장', st: { text: 'Hello 안녕하세요 World 반갑습니다 meme-card 스튜디오 극단 입력 테스트 문장입니다 mixed 한영 혼합', fontSize: 70 } },
+    { id: 'E04', name: '줄바꿈 12줄', st: { text: Array.from({ length: 12 }, (_, i) => `${i + 1}번째 줄`).join('\n'), fontSize: 110 } },
+    { id: 'E05', name: '이모지 90개 연속', st: { text: '😀🔥🎉'.repeat(30), fontSize: 70 }, surrogates: true },
+    { id: 'E06', name: '빈 문구', st: { text: '' }, blank: true },
+    { id: 'E07', name: '세로 이미지 (600×1600)', st: { text: '세로 이미지 위 문구' }, bg: () => mkImg(600, 1600) },
+    { id: 'E08', name: '가로 이미지 (2400×300, 전체 보기)', st: { aspectRatio: '9:16', imgFit: 'contain', text: '가로로 긴 이미지' }, bg: () => mkImg(2400, 300) },
+    { id: 'E09', name: '투명 PNG', st: { text: '투명 배경 위 문구' }, bg: () => mkImg(800, 800, 'transparent') },
+    { id: 'E10', name: '공백·탭만 입력', st: { text: '   \t  ' }, blank: true },
+    { id: 'E11', name: '최대 글자 크기 + 모서리 위치 + 긴 문구', st: { fontSize: 140, posX: 100, posY: 100, text: '모서리에 붙은 아주 큰 글자 테스트' } },
+    { id: 'E12', name: 'HTML 태그·특수문자 (템플릿 이름 포함)', st: { text: '<img src=x onerror="window.__xss=1">&"\'' }, html: true }
+];
+async function runEdgeCase(c, legacy) {
+    try {
+        const st = { ...DEFAULTS, ...c.st };
+        const bg = c.bg ? { img: c.bg() } : { img: makeSampleBg() };
+        const cv = document.createElement('canvas');
+        const L = renderCard(cv, st, bg, { legacy });
+        const g = cv.getContext('2d'), W = L.W, H = L.H, fails = [];
+        if (c.blank) { if (L.drawn) fails.push('빈 입력인데 글자가 그려짐'); }
+        else {
+            if (!L.drawn) fails.push('문구가 그려지지 않음');
+            else {
+                const over = Math.max(-L.bbox.l, L.bbox.r - W, -L.bbox.t, L.bbox.b - H);
+                if (over > 0.5) fails.push(`영역을 ${Math.round(over)}px 벗어남`);
+                if (c.surrogates && L.lines.some(l => /[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/.test(l))) fails.push('이모지가 쪼개짐');
+                if (L.lines.join('').replace(/\s/g, '') !== st.text.replace(/\s/g, '')) fails.push('문구 일부가 사라짐');
+            }
+        }
+        const px = [[0, 0], [W - 1, 0], [0, H - 1], [W - 1, H - 1], [W >> 1, H >> 1]].map(([x, y]) => g.getImageData(x, y, 1, 1).data[3]);
+        if (px.some(a => a < 255)) fails.push('투명 픽셀이 남음 (JPEG 저장 시 검게 깨짐)');
+        const jb = await new Promise(r => cv.toBlob(r, 'image/jpeg', .9));
+        const bad = jb ? await verifyBlob(jb, 'jpeg', W, H) : '저장 실패';
+        if (bad) fails.push('저장 파일: ' + bad);
+        if (c.html) {
+            const doc = new DOMParser().parseFromString('<span>' + st.text + '</span>', 'text/html');
+            const unsafe = !!doc.querySelector('img');
+            const safe = !new DOMParser().parseFromString('<span>' + esc(st.text) + '</span>', 'text/html').querySelector('img');
+            if (legacy ? unsafe : !safe) fails.push(legacy ? '템플릿 목록에 이름이 이스케이프 없이 삽입되면 HTML이 실행됨' : '이스케이프 후에도 HTML 요소가 생성됨');
+        }
+        return { pass: !fails.length, detail: fails.length ? fails.join(' / ') : '이상 없음' };
+    } catch (e) { return { pass: false, detail: '예외: ' + e.message }; }
+}
+
+async function checkEdge() {
+    const rows = [];
+    for (const c of EDGE_CASES) rows.push({ id: c.id, name: c.name, before: await runEdgeCase(c, true), after: await runEdgeCase(c, false) });
+    return rows;
+}
+async function checkRatios() {
+    const rows = [];
+    for (const r of ['1:1', '4:5', '9:16']) {
+        const st = { ...S, aspectRatio: r, text: '가장자리 테스트 😀 긴 줄바꿈 확인용 문구입니다 가나다라마바사', posX: 92, posY: 94, textAlign: 'left' };
+        const [W, H] = DIM[r], bg = BG.img ? BG : { img: makeSampleBg() };
+        const prev = document.createElement('canvas'), L = renderCard(prev, st, bg);
+        const blob = await exportBlob(st, bg, 'png', 1);
+        const bmp = await createImageBitmap(blob), back = document.createElement('canvas'); back.width = bmp.width; back.height = bmp.height;
+        back.getContext('2d').drawImage(bmp, 0, 0);
+        const a = prev.getContext('2d').getImageData(0, 0, W, H).data, b = back.getContext('2d').getImageData(0, 0, back.width, back.height).data;
+        let diff = 0; if (a.length === b.length) for (let i = 0; i < a.length; i += 4) if (a[i] !== b[i] || a[i + 1] !== b[i + 1] || a[i + 2] !== b[i + 2]) diff++;
+        const dimOk = bmp.width === W && bmp.height === H;
+        const inside = L.bbox.l >= 0 && L.bbox.r <= W && L.bbox.t >= 0 && L.bbox.b <= H;
+        rows.push({ id: { '1:1': 'C11', '4:5': 'C12', '9:16': 'C13' }[r], name: `${r} 미리보기↔PNG 파일`, pass: dimOk && diff === 0 && inside, detail: `${bmp.width}×${bmp.height}, 다른 픽셀 ${diff}개, 문구 위치 x ${Math.round(L.bbox.l)}–${Math.round(L.bbox.r)} / y ${Math.round(L.bbox.t)}–${Math.round(L.bbox.b)}, 줄 ${L.lines.length}개` });
+    }
+    return rows;
+}
+async function checkPreserve() {
+    const rows = [], snap = () => JSON.stringify({ S, n: templatesStore.map(t => t.id + t.name), bg: BG.source + BG.name });
+    const run = async (name, fn) => { const b = snap(), n0 = templatesStore.length; const detail = await fn(); const same = snap() === b; rows.push({ name, pass: same && !!detail.rejected, detail: `${detail.rejected ? '거부됨' : '거부되지 않음'} · ${detail.msg} · 작업 ${same ? '그대로' : '변경됨'} · 목록 ${n0}→${templatesStore.length}건` }); };
+    await run('문법 손상 JSON', async () => { const r = processJSONImport('{"text":"x", broken', true); return { rejected: !r.ok, msg: r.reason }; });
+    await run('필수 항목 누락 JSON', async () => { const r = processJSONImport('{"author":"t"}', true); return { rejected: !r.ok, msg: r.reason }; });
+    await run('값 형식 오류 JSON', async () => { const r = processJSONImport(JSON.stringify({ text: 'x', aspectRatio: '1:1', fontSize: 'abc' }), true); return { rejected: !r.ok, msg: r.reason }; });
+    await run('일부만 잘못된 목록 JSON (전체 거부)', async () => { const ok = { name: 'ok', ...DEFAULTS, text: 'a' }, bad = { name: 'bad', ...DEFAULTS, text: 'a', fontSize: 9999 }; const r = processJSONImport(JSON.stringify({ templates: [ok, bad] }), true); return { rejected: !r.ok, msg: r.reason }; });
+    return rows;
+}
+async function checkFiles() {
+    const png = new Uint8Array([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0, 0, 0, 0]);
+    const cases = [
+        ['텍스트를 .png로 위장', new File(['hello world'], 'fake.png', { type: 'image/png' }), false],
+        ['GIF 파일', new File([new Uint8Array([0x47, 0x49, 0x46, 0x38, 0x39, 0x61, 1, 0, 1, 0])], 'a.gif', { type: 'image/gif' }), false],
+        ['빈 파일', new File([], 'empty.jpg', { type: 'image/jpeg' }), false],
+        ['PNG 시그니처만 있는 손상 파일', new File([png], 'broken.png', { type: 'image/png' }), false]
+    ];
+    const real = await new Promise(r => mkImg(64, 64).toBlob(r, 'image/png')), realJ = await new Promise(r => mkImg(64, 64).toBlob(r, 'image/jpeg'));
+    cases.push(['정상 PNG', new File([real], 'ok.png'), true], ['정상 JPEG (확장자 .dat)', new File([realJ], 'ok.dat'), true]);
+    const rows = [], b = JSON.stringify(S) + BG.name;
+    for (const [name, f, expectOk] of cases) {
+        const r = await loadCleanImage(f);
+        rows.push({ name, pass: r.ok === expectOk && JSON.stringify(S) + BG.name === b, detail: r.ok ? `불러오기 가능 (${r.kind.toUpperCase()}), 작업 그대로` : `거부: ${r.reason}` });
+    }
+    return rows;
+}
+async function checkCrud() {
+    const rows = [], backup = JSON.stringify(templatesStore), Sbak = JSON.stringify(S);
+    const ids = [], persisted = () => { const p = lsGet(LS.tpl, []); return JSON.stringify(p) === JSON.stringify(templatesStore); };
+    for (let i = 1; i <= 3; i++) { S.text = `CRUD 검사 ${i}`; const t = TPL.create(`__검사${i}`); ids.push(t.id); }
+    rows.push({ id: 'C17', name: '템플릿 3개 생성', pass: new Set(ids).size === 3 && ids.every(findTpl), detail: `ID ${ids.length}개 고유` });
+    const loaded = ids.map(id => { TPL.load(id); return S.text; });
+    rows.push({ id: 'C18', name: '생성한 템플릿 불러오기', pass: loaded.join('|') === 'CRUD 검사 1|CRUD 검사 2|CRUD 검사 3', detail: loaded.join(', ') });
+    templatesStore.unshift({ ...templatesStore[0], id: uid(), name: '__끼어든 템플릿' }); saveTemplates();   // 목록 순서가 바뀌어도 ID로 찾는지
+    S.text = '수정됨'; TPL.update(ids[1]);
+    const up = findTpl(ids[1]);
+    rows.push({ id: 'C19', name: '수정 (목록 순서가 바뀌어도 대상 유지)', pass: up.text === '수정됨' && findTpl(ids[0]).text === 'CRUD 검사 1' && findTpl(ids[2]).text === 'CRUD 검사 3', detail: '배열 위치가 아닌 고정 ID로 대상을 찾음' });
+    TPL.remove(ids[0]);
+    rows.push({ id: 'C20', name: '삭제 (다른 항목 유지)', pass: !findTpl(ids[0]) && !!findTpl(ids[1]) && !!findTpl(ids[2]), detail: `남은 검사용 항목 ${ids.filter(findTpl).length}개` });
+    rows.push({ id: 'C21', name: '저장소 재읽기 시 동일 (새로고침 유지)', pass: persisted(), detail: 'localStorage를 다시 읽은 결과가 메모리와 일치' });
+    templatesStore = JSON.parse(backup); saveTemplates(); renderTemplates();   // 검사 흔적 제거
+    Object.assign(S, JSON.parse(Sbak)); syncUI(); render();
+    return rows;
+}
+
+const pill = ok => ok ? '<span class="pill-pass">PASS</span>' : '<span class="pill-fail">FAIL</span>';
+function renderChecks() {
+    const out = $('#checks-out'); let h = '';
+    if (RESULTS.edge) {
+        const bf = RESULTS.edge.filter(r => !r.before.pass), af = RESULTS.edge.filter(r => r.after.pass);
+        const fixed = RESULTS.edge.filter(r => !r.before.pass && r.after.pass).length;
+        h += `<div class="space-y-2"><div class="font-bold text-slate-200">극단 입력 12건 (C14~C16)</div>
+        <div class="text-slate-400">수정 전 FAIL <b class="text-rose-300">${bf.length}</b>건 → 수정 후 PASS <b class="text-emerald-300">${af.length}/12</b> (FAIL→PASS ${fixed}건)</div>
+        <div class="space-y-1.5">${RESULTS.edge.map(r => `<div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5"><div class="flex items-center justify-between gap-2"><span class="text-slate-200"><span class="font-mono text-slate-500">${r.id}</span> ${esc(r.name)}</span><span class="whitespace-nowrap">전 ${pill(r.before.pass)} 후 ${pill(r.after.pass)}</span></div>
+            <div class="text-[10px] text-slate-500 mt-1">전: ${esc(r.before.detail)}<br>후: ${esc(r.after.detail)}</div></div>`).join('')}</div></div>`;
+    }
+    for (const [key, title] of [['ratio', '화면비별 미리보기 ↔ 파일 (C11~C13)'], ['preserve', '잘못된 입력 뒤 작업 보존 (C16, C23~C24)'], ['crud', '템플릿 CRUD (C17~C21)'], ['files', '잘못된 파일 거부 (C09~C10)']]) {
+        if (!RESULTS[key]) continue;
+        h += `<div class="space-y-1.5"><div class="font-bold text-slate-200">${title}</div>${RESULTS[key].map(r => `<div class="bg-slate-950 border border-slate-800 rounded-lg p-2.5"><div class="flex items-center justify-between gap-2"><span class="text-slate-200">${r.id ? `<span class="font-mono text-slate-500">${r.id}</span> ` : ''}${esc(r.name)}</span>${pill(r.pass)}</div><div class="text-[10px] text-slate-500 mt-1">${esc(r.detail)}</div></div>`).join('')}</div>`;
+    }
+    out.innerHTML = h; renderChecklist();
+}
+async function runAllChecks() {
+    const btn = $('#run-checks-btn'); btn.disabled = true; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>검사 중…';
+    try {
+        await Promise.all(FONTS.map(f => document.fonts.load(`bold 48px "${f}"`).catch(() => { })));
+        RESULTS.edge = await checkEdge(); renderChecks();
+        RESULTS.ratio = await checkRatios(); renderChecks();
+        RESULTS.preserve = await checkPreserve(); renderChecks();
+        RESULTS.files = await checkFiles(); renderChecks();
+        RESULTS.crud = await checkCrud(); renderChecks();
+        const all = [...RESULTS.edge.map(r => r.after), ...RESULTS.ratio, ...RESULTS.preserve, ...RESULTS.files, ...RESULTS.crud];
+        showToast(`검사 완료: ${all.filter(r => r.pass).length}/${all.length} PASS`, all.every(r => r.pass) ? 'success' : 'warning');
+    } catch (e) { showToast('검사 중 오류: ' + e.message, 'error'); console.error(e); }
+    btn.disabled = false; btn.innerHTML = '<i class="fa-solid fa-play"></i>전체 검사 실행';
+}
+
+/* ================= 공개 안전 점검 · 제출 ================= */
+async function runSafety() {
+    const out = $('#safety-out'); out.innerHTML = '검사 중…';
+    let meta = 0; const metaDetail = [];
+    for (let i = 0; i < 3; i++) { const found = scanMetadata(new Uint8Array(await GAL[i].blob.arrayBuffer())); meta += found.length; if (found.length) metaDetail.push(`슬롯${i + 1}: ${found.join(',')}`); }
+    const cur = await exportBlob(S, BG, 'jpeg', 1, .9), curFound = scanMetadata(new Uint8Array(await cur.arrayBuffer())); meta += curFound.length;
+    const corpus = [S.text, ...templatesStore.flatMap(t => [t.name, t.text]), ...galleryData.flatMap(d => [d.title, d.st.text, provText(d.prov)]), ...$$('#panel-submit textarea, #panel-submit input').map(e => e.value)].join('\n');
+    const hits = scanText(corpus), pii = hits.filter(h => h.type.startsWith('개인')), sec = hits.filter(h => h.type.startsWith('비밀'));
+    const sum = a => a.reduce((s, h) => s + h.count, 0);
+    RESULTS.safety = { metadata: meta, pii: sum(pii), secrets: sum(sec), detail: [...metaDetail, ...hits.map(h => `${h.type} ${h.count}건`)] };
+    const row = (label, n, d) => `<div class="flex items-center justify-between bg-slate-950 border border-slate-800 rounded-lg p-2.5"><span class="text-slate-200">${label}${d ? `<span class="block text-[10px] text-slate-500">${esc(d)}</span>` : ''}</span><span class="${n ? 'pill-fail' : 'pill-pass'}">${n}건</span></div>`;
+    out.innerHTML = row('이미지 위치·카메라 메타데이터 (갤러리 3 + 현재 JPEG)', meta, metaDetail.join(' ')) + row('개인정보 (이메일·전화·주민번호·카드)', RESULTS.safety.pii, pii.map(h => h.type).join(', ')) + row('비밀값 (키·토큰·비밀번호)', RESULTS.safety.secrets, sec.map(h => h.type).join(', '))
+        + '<p class="text-[10px] text-slate-500">점검 범위: 갤러리 이미지 바이트, 문구, 템플릿, 출처·제출 입력란. 외부로 전송되지 않습니다.</p>';
+    renderChecklist();
+}
+function judgmentState() {
+    const j = { delegated: $('#j-delegated').value.trim(), decided: $('#j-decided').value.trim(), rejected: $('#j-rejected').value.trim() };
+    const missing = [['① AI에게 맡긴 일', j.delegated], ['② 직접 판단한 일', j.decided], ['③ 따르지 않은 일(없으면 이유)', j.rejected]].filter(x => !x[1]).map(x => x[0]);
+    return { ...j, missing };
+}
+function renderChecklist() {
+    const allPass = k => RESULTS[k] && RESULTS[k].every(r => r.pass);
+    const edgeOk = RESULTS.edge && RESULTS.edge.every(r => r.after.pass), edgeFix = RESULTS.edge && RESULTS.edge.some(r => !r.before.pass && r.after.pass);
+    const j = judgmentState(), urlOk = ['#submit-result-url', '#submit-source-url'].every(s => /^https?:\/\/\S+$/.test($(s).value.trim()));
+    const sf = RESULTS.safety && !RESULTS.safety.metadata && !RESULTS.safety.pii && !RESULTS.safety.secrets;
+    const provOk = galleryData.every(d => validateProv(d.prov).ok);
+    const items = [
+        ['PNG·JPEG 편집, 잘못된 파일 거부', allPass('files')], ['세 화면비 미리보기와 파일 일치', allPass('ratio')],
+        ['극단 입력 12건 검사 (FAIL→PASS 기록)', edgeOk && edgeFix], ['템플릿 생성·불러오기·수정·삭제 유지', allPass('crud')],
+        ['JSON 복원·거부 시 기존 작업 유지', allPass('preserve')], ['완성 이미지 3종 출처 기록', provOk], ['공개 안전 점검 (위치·개인정보·비밀값 0건)', !!sf],
+        ['AI와 나의 판단 3항목 작성', !j.missing.length], ['결과물·소스 주소 입력', urlOk]
+    ];
+    $('#checklist').innerHTML = items.map(([t, ok]) => `<div class="flex items-center gap-2 ${ok ? 'text-emerald-300' : 'text-slate-400'}"><i class="fa-${ok ? 'solid fa-square-check' : 'regular fa-square'}"></i>${t}</div>`).join('')
+        + '<p class="text-[10px] text-slate-500 pt-1">검사·점검은 실행해야 체크됩니다. 판단 기록과 주소는 직접 입력해야 합니다.</p>';
+    $('#j-msg').textContent = j.missing.length ? '아직 비어 있음: ' + j.missing.join(', ') : '세 항목이 모두 작성되었습니다.';
+}
+function exportReport() {
+    const j = judgmentState();
+    const rep = {
+        app: 'MemeAndCardStudio', generatedAt: new Date().toISOString(),
+        urls: { result: $('#submit-result-url').value.trim(), source: $('#submit-source-url').value.trim() },
+        checks: RESULTS, templateOps: OPS, templateCount: templatesStore.length,
+        gallery: galleryData.map((d, i) => ({ slot: i + 1, title: d.title, aspectRatio: d.st.aspectRatio, text: d.st.text, provenance: d.prov, provenanceText: provText(d.prov) })),
+        judgment: { aiDelegated: j.delegated, decidedByMe: j.decided, rejectedAiSuggestions: j.rejected }
+    };
+    downloadText(`meme-card-report_${stamp()}.json`, JSON.stringify(rep, null, 2));
+    showToast('제출 기록을 내려받았습니다.' + (j.missing.length ? ` (비어 있는 항목: ${j.missing.join(', ')})` : ''), j.missing.length ? 'warning' : 'success');
+}
+
+/* ================= UI 보조 ================= */
+function showToast(msg, type = 'info', action) {
+    const box = $('#toast-container'), t = document.createElement('div');
+    const cls = { info: 'border-slate-700 text-slate-100', success: 'border-emerald-600/50 text-emerald-300', error: 'border-rose-600/50 text-rose-300', warning: 'border-amber-600/50 text-amber-300' }[type];
+    t.className = `p-3.5 rounded-xl border bg-slate-900 ${cls} text-xs font-medium shadow-2xl flex items-center gap-2.5 transition-opacity duration-300`;
+    t.innerHTML = `<span class="flex-1"></span>`; t.firstChild.textContent = msg;
+    if (action) { const b = document.createElement('button'); b.className = 'btn !py-1'; b.textContent = action.label; b.onclick = () => { action.fn(); t.remove(); }; t.appendChild(b); }
+    box.appendChild(t);
+    setTimeout(() => { t.classList.add('opacity-0'); setTimeout(() => t.remove(), 300); }, action ? 8000 : 4500);
+}
+function showModal(title, html) { $('#modal-title').textContent = title; $('#modal-body').innerHTML = html; $('#modal-overlay').classList.remove('hidden'); $('#modal-overlay').classList.add('flex'); }
+function closeModal() { $('#modal-overlay').classList.add('hidden'); $('#modal-overlay').classList.remove('flex'); }
+
+function updateSelection() {
+    const box = $('#sel-box');
+    if (!selected || !LAST || !LAST.drawn) { box.classList.add('hidden'); return; }
+    const p = LAST.fontSize * 0.35, W = LAST.W, H = LAST.H;
+    const w = LAST.w + 2 * p, h = LAST.h + 1.2 * p * 1.0 + p * 0.0;
+    Object.assign(box.style, { left: (LAST.cx - w / 2) / W * 100 + '%', top: (LAST.cy - h / 2) / H * 100 + '%', width: w / W * 100 + '%', height: h / H * 100 + '%', transform: `rotate(${S.rotation}deg)`, transformOrigin: '50% 50%' });
+    box.classList.remove('hidden');
+}
+let guidesOn = false;
+function updateGuides(drag) {
+    const layer = $('#guide-layer'); layer.classList.toggle('hidden', !guidesOn && !drag);
+    $('#btn-guides').classList.toggle('!border-blue-500', guidesOn);
+    let h = '<div class="guide-line" style="left:50%;top:0;bottom:0;width:1px"></div><div class="guide-line" style="top:50%;left:0;right:0;height:1px"></div>';
+    if (guidesOn && S.aspectRatio === '9:16') h += '<div style="position:absolute;left:0;right:0;top:0;height:13%;background:rgba(244,63,94,.18);border-bottom:1px dashed rgba(244,63,94,.7)"></div><div style="position:absolute;left:0;right:0;bottom:0;height:20%;background:rgba(244,63,94,.18);border-top:1px dashed rgba(244,63,94,.7)"></div>';
+    if (guidesOn) h += '<div style="position:absolute;inset:5%;border:1px dashed rgba(34,211,238,.5)"></div>';
+    layer.innerHTML = h;
+}
+function switchTab(tab) {
+    $$('[data-panel]').forEach(p => p.classList.toggle('hidden', p.id !== 'panel-' + tab));
+    $$('[data-action="tab"]').forEach(b => b.classList.toggle('tab-on', b.dataset.tab === tab));
+    if (tab === 'submit') renderChecklist();
+}
+
+/* ================= 액션 · 이벤트 ================= */
+const ACTIONS = {
+    tab: el => switchTab(el.dataset.tab),
+    set: el => { const [k, v] = el.dataset.set.split(/:(.*)/s); S[k] = v; onChange(); },
+    toggle: el => { const k = el.dataset.kToggle; S[k] = !S[k]; onChange(); },
+    preset: el => { Object.assign(S, PRESETS[+el.dataset.i].set); onChange(); },
+    upload: () => $('#image-upload').click(),
+    sample: () => { BG.img = makeSampleBg(); BG.source = 'sample'; BG.name = ''; S.bgMode = 'image'; onChange(); showToast('샘플 배경으로 되돌렸습니다.', 'info'); },
+    download: doDownload, copy: doCopy, undo: () => travel(-1), redo: () => travel(1),
+    guides: () => { guidesOn = !guidesOn; updateGuides(); },
+    reset: () => {
+        if (!confirm('문구·스타일을 처음 상태로 되돌릴까요? (실행취소로 복구할 수 있습니다)')) return;
+        Object.assign(S, DEFAULTS, { text: '' }); BG.img = makeSampleBg(); BG.source = 'sample'; BG.name = ''; onChange(); pushHistory();
+    },
+    closeModal,
+    tplSave: () => { const t = TPL.create($('#new-template-name').value); if (t) { $('#new-template-name').value = ''; showToast(`'${t.name}' 저장됨`, 'success'); } },
+    tplLoad: el => { const t = TPL.load(el.dataset.id); if (t) showToast(`'${t.name}' 불러옴`, 'info'); },
+    tplUpdate: el => { const t = TPL.update(el.dataset.id); if (t) showToast(`'${t.name}'을(를) 현재 디자인으로 덮어썼습니다.`, 'success'); },
+    tplRename: el => { const t = findTpl(el.dataset.id); if (!t) return; const n = prompt('새 이름', t.name); if (n && n.trim()) { t.name = n.trim().slice(0, 40); saveTemplates(); renderTemplates(); } },
+    tplDup: el => { const t = findTpl(el.dataset.id); if (!t) return; const c = { ...t, id: uid(), name: (t.name + ' 복사').slice(0, 40) }; templatesStore.unshift(c); OPS.create++; saveTemplates(); renderTemplates(); },
+    tplDelete: el => {
+        const r = TPL.remove(el.dataset.id); if (!r) return;
+        showToast(`'${r.t.name}' 삭제됨`, 'warning', { label: '되돌리기', fn: () => { templatesStore.splice(Math.min(r.i, templatesStore.length), 0, r.t); OPS.delete--; saveTemplates(); renderTemplates(); } });
+    },
+    jsonExportCur: () => { downloadText(`meme_template_${stamp()}.json`, JSON.stringify({ schemaVersion: '2.0', app: 'MemeAndCardStudio', exportedAt: new Date().toISOString(), template: { name: '내보낸 템플릿', ...curTemplateFields() } }, null, 2)); showToast('현재 디자인 JSON을 내보냈습니다.', 'success'); },
+    jsonExportAll: () => { downloadText(`meme_templates_backup_${stamp()}.json`, JSON.stringify({ schemaVersion: '2.0', app: 'MemeAndCardStudio', exportedAt: new Date().toISOString(), templates: templatesStore.map(({ id, ...r }) => r) }, null, 2)); showToast(`템플릿 ${templatesStore.length}개를 백업했습니다.`, 'success'); },
+    jsonImport: () => $('#json-file-input').click(),
+    jsonBad: () => processJSONImport('{"aspectRatio": "1:1", "text": "손상된 JSON", bad_syntax...'),
+    jsonMissing: () => processJSONImport(JSON.stringify({ author: 'tester', title: '필수값 없는 JSON' })),
+    jsonWrongType: () => processJSONImport(JSON.stringify({ text: '형식 오류', aspectRatio: '1:1', fontSize: 'abc', textColor: 'red' })),
+    runChecks: runAllChecks, runSafety, exportReport,
+    galSave: el => saveToGallery(+el.dataset.i)
+};
+document.addEventListener('click', e => { const el = e.target.closest('[data-action]'); if (el && ACTIONS[el.dataset.action]) ACTIONS[el.dataset.action](el, e); });
+
+document.addEventListener('input', e => {
+    const el = e.target;
+    if (el.dataset && el.dataset.k) {
+        S[el.dataset.k] = el.type === 'checkbox' ? el.checked : (el.type === 'range' ? Number(el.value) : el.value);
+        onChange();
+    } else if (el.dataset && el.dataset.hexFor) {
+        if (/^#[0-9a-f]{6}$/i.test(el.value)) { S[el.dataset.hexFor] = el.value.toLowerCase(); onChange(); }
+    }
+});
+document.addEventListener('keydown', e => {
+    const typing = /^(TEXTAREA|INPUT|SELECT)$/.test(e.target.tagName) && e.target.type !== 'range' && e.target.type !== 'color';
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 's') { e.preventDefault(); doDownload(); }
+    else if ((e.ctrlKey || e.metaKey) && !typing && e.key.toLowerCase() === 'z') { e.preventDefault(); travel(e.shiftKey ? 1 : -1); }
+    else if ((e.ctrlKey || e.metaKey) && !typing && e.key.toLowerCase() === 'y') { e.preventDefault(); travel(1); }
+    else if (e.target === canvas && e.key.startsWith('Arrow')) {
+        e.preventDefault(); const d = e.shiftKey ? 5 : 1;
+        if (e.key === 'ArrowLeft') S.posX = clamp(S.posX - d, 0, 100); if (e.key === 'ArrowRight') S.posX = clamp(S.posX + d, 0, 100);
+        if (e.key === 'ArrowUp') S.posY = clamp(S.posY - d, 0, 100); if (e.key === 'ArrowDown') S.posY = clamp(S.posY + d, 0, 100);
+        onChange();
+    } else if (e.key === 'Escape') closeModal();
+});
+document.addEventListener('paste', e => {
+    const f = [...(e.clipboardData ? e.clipboardData.files : [])].find(f => f.type.startsWith('image/'));
+    if (f) { e.preventDefault(); handleImageFile(f); }
+});
+
+function initCanvasEvents() {
+    const wrap = $('#canvas-container'); let dragging = false;
+    const pos = e => { const r = canvas.getBoundingClientRect(); return [clamp(((e.clientX - r.left) / r.width) * 100, 0, 100), clamp(((e.clientY - r.top) / r.height) * 100, 0, 100)]; };
+    const hit = e => {
+        if (!LAST || !LAST.drawn) return false;
+        const r = canvas.getBoundingClientRect(), x = (e.clientX - r.left) / r.width * LAST.W - LAST.cx, y = (e.clientY - r.top) / r.height * LAST.H - LAST.cy;
+        const a = -S.rotation * Math.PI / 180, rx = x * Math.cos(a) - y * Math.sin(a), ry = x * Math.sin(a) + y * Math.cos(a), p = LAST.fontSize * 0.35;
+        return Math.abs(rx) <= LAST.w / 2 + p && Math.abs(ry) <= LAST.h / 2 + p;
+    };
+    canvas.addEventListener('pointerdown', e => {
+        canvas.focus();
+        const was = selected; selected = hit(e); updateSelection();
+        if (!selected) return;
+        dragging = true; canvas.setPointerCapture(e.pointerId); canvas.classList.add('cursor-grabbing'); updateGuides(true);
+    });
+    const rh = $('#rot-handle'); let rotating = false;
+    rh.addEventListener('pointerdown', e => { rotating = true; rh.setPointerCapture(e.pointerId); e.preventDefault(); });
+    rh.addEventListener('pointermove', e => {
+        if (!rotating || !LAST) return;
+        const r = canvas.getBoundingClientRect(), cx = r.left + LAST.cx / LAST.W * r.width, cy = r.top + LAST.cy / LAST.H * r.height;
+        let deg = Math.atan2(e.clientY - cy, e.clientX - cx) * 180 / Math.PI + 90;
+        deg = ((deg + 180) % 360 + 360) % 360 - 180;
+        if (e.shiftKey) deg = Math.round(deg / 15) * 15;
+        else for (const t of [-180, -135, -90, -45, 0, 45, 90, 135, 180]) if (Math.abs(deg - t) <= 3) deg = t;
+        S.rotation = clamp(Math.round(deg), -180, 180); onChange();
+    });
+    const rEnd = () => { if (rotating) { rotating = false; commit.flush(); } };
+    rh.addEventListener('pointerup', rEnd); rh.addEventListener('pointercancel', rEnd);
+    canvas.addEventListener('pointermove', e => {
+        if (!dragging) return;
+        let [x, y] = pos(e); x = Math.abs(x - 50) <= 2 ? 50 : x; y = Math.abs(y - 50) <= 2 ? 50 : y;   // 중앙 자석
+        S.posX = Math.round(x); S.posY = Math.round(y); onChange();
+    });
+    const end = () => { if (!dragging) return; dragging = false; canvas.classList.remove('cursor-grabbing'); updateGuides(); commit.flush(); };
+    canvas.addEventListener('pointerup', end); canvas.addEventListener('pointercancel', end);
+    wrap.addEventListener('drop', e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleImageFile(f); });
+}
+
+/* ================= 시작 ================= */
+window.addEventListener('DOMContentLoaded', async () => {
+    canvas = $('#meme-canvas');
+    BG.img = makeSampleBg();
+    $('#presets').innerHTML = PRESETS.map((p, i) => `<button class="btn !py-1 !px-2.5 text-[11px]" data-action="preset" data-i="${i}">${p.label}</button>`).join('');
+
+    const draft = lsGet(LS.draft, null);
+    if (draft) { const v = validateTemplate(draft); if (v.ok) Object.assign(S, v.clean); }
+    loadTemplates(); loadGalleryData();
+
+    $('#image-upload').addEventListener('change', e => { const f = e.target.files[0]; e.target.value = ''; if (f) handleImageFile(f); });
+    $('#json-file-input').addEventListener('change', e => {
+        const f = e.target.files[0]; e.target.value = ''; if (!f) return;
+        const r = new FileReader(); r.onload = () => processJSONImport(String(r.result)); r.onerror = () => showToast('파일을 읽지 못했습니다.', 'error'); r.readAsText(f);
+    });
+    $('#tpl-filter').addEventListener('input', renderTemplates);
+    $('#exp-q').addEventListener('input', e => { $('#exp-q-val').textContent = e.target.value; });
+
+    for (const id of ['prov-type', 'prov-url', 'prov-basis', 'prov-basis-text']) $('#' + id).addEventListener('input', () => {
+        PROV = { type: $('#prov-type').value, url: $('#prov-url').value.trim(), basis: $('#prov-basis').value, basisText: $('#prov-basis-text').value.trim() };
+        lsSet(LS.prov, PROV); syncProvUI();
+    });
+    const saved = lsGet(LS.judg, {}), urls = lsGet(LS.url, {});
+    $('#j-delegated').value = saved.delegated || ''; $('#j-decided').value = saved.decided || ''; $('#j-rejected').value = saved.rejected || '';
+    $('#submit-result-url').value = urls.result || ''; $('#submit-source-url').value = urls.source || '';
+    const persistSubmit = () => {
+        lsSet(LS.judg, { delegated: $('#j-delegated').value, decided: $('#j-decided').value, rejected: $('#j-rejected').value });
+        lsSet(LS.url, { result: $('#submit-result-url').value, source: $('#submit-source-url').value });
+        const bad = [$('#submit-result-url').value.trim(), $('#submit-source-url').value.trim()].filter(u => u && !/^https?:\/\/\S+$/.test(u));
+        $('#submit-url-msg').textContent = bad.length ? '주소는 http:// 또는 https://로 시작해야 합니다.' : '주소는 계정 생성·로그인·인증 없이 새 시크릿 창에서 열리는지 직접 확인하세요.';
+        renderChecklist();
+    };
+    $$('#panel-submit textarea, #panel-submit input').forEach(e => e.addEventListener('input', persistSubmit));
+
+    if (!storageOk()) showToast('이 환경에서는 브라우저 저장소를 쓸 수 없어 템플릿이 새로고침 후 유지되지 않습니다. (일반 http/https 또는 파일로 열어 주세요)', 'warning');
+    initCanvasEvents(); syncProvUI(); syncUI(); renderTemplates(); render();
+    pushHistory(); updateUndoButtons();
+    await Promise.all(FONTS.map(f => document.fonts.load(`bold 48px "${f}"`).catch(() => { })));   // 글꼴이 준비된 뒤 다시 그림
+    render(); await renderGallery(); renderChecklist();
+});
+</script>
+</body>
+</html>
